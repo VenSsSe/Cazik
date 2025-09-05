@@ -192,8 +192,10 @@ async function startSpin(isFirstFreeSpin = false) {
     }
 
     let totalMultiplierOnScreen = 0;
-    grid.gridSprites.flat().forEach(sprite => {
-        if (sprite && sprite.multiplierValue) totalMultiplierOnScreen += sprite.multiplierValue;
+    grid.gridSprites.flat().forEach(container => {
+        if (container && container.symbolSprite && container.symbolSprite.multiplierValue) {
+            totalMultiplierOnScreen += container.symbolSprite.multiplierValue;
+        }
     });
 
     if (totalMultiplierOnScreen > 0 && currentSpinTotalWin > 0) {

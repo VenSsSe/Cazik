@@ -19,7 +19,7 @@ export async function loadAssets() {
         { alias: 'background_olympus', src: 'assets/backgrounds/background_olympus.jpg' },
         { alias: 'reels_background', src: 'assets/backgrounds/reels_background.png' },
         { alias: 'game_board_frame', src: 'assets/ui/frames/game_board_frame.png' },
-        // { alias: 'ui_panel_bottom', src: 'assets/ui/panels/ui_panel_bottom.png' }, // Удалено, так как панель больше не используется
+        { alias: 'symbol_grid_frame', src: 'assets/ui/frames/symbol_grid_frame.png' },
         { alias: 'logo', src: 'assets/ui/logo/logo.png' },
 
         // --- ИЗМЕНЕНО: Обновляем пути к кнопкам и попапам ---

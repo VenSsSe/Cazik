@@ -21,12 +21,11 @@ export function createScene(app) {
     reelsBackground.height = 750; // 5 рядов * 150px
     app.stage.addChild(reelsBackground);
 
-    // Рамка игрового поля
+    // Рамка игрового поля (внешняя)
     const gameFrame = PIXI.Sprite.from('game_board_frame');
     gameFrame.anchor.set(0.5);
     gameFrame.x = app.screen.width / 2;
     gameFrame.y = app.screen.height / 2 - 50; // Смещаем туда же, куда и фон барабанов
-    // Масштабируем раму пропорционально, чтобы она красиво обрамляла фон барабанов
     const frameScale = (reelsBackground.width + 50) / gameFrame.texture.width;
     gameFrame.scale.set(frameScale);
     app.stage.addChild(gameFrame);

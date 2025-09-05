@@ -61,18 +61,26 @@ export class Grid {
     }
 
     /**
-     * Создает спрайт символа
+     * Создает спрайт символа С РАМКОЙ.
      * @param {object} symbolData - Данные символа
      * @param {number} col - колонка
      * @param {number} row - ряд
-     * @returns {PIXI.Sprite}
+     * @returns {PIXI.Container} - Контейнер, содержащий рамку и символ.
      */
     createSymbolSprite(symbolData, col, row) {
+        const cellContainer = new PIXI.Container();
         let symbolSprite;
 
+        // 1. Создаем рамку ячейки
+        const frame = PIXI.Sprite.from('symbol_grid_frame');
+        frame.width = SYMBOL_SIZE;
+        frame.height = SYMBOL_SIZE;
+        frame.anchor.set(0.5);
+        cellContainer.addChild(frame);
+
+        // 2. Создаем сам символ (обычный или анимированный множитель)
         if (symbolData.type === 'multiplier') {
             const frames = [];
-            // Собираем кадры анимации vfx_multiplier_orb_0, vfx_multiplier_orb_1 и т.д.
             for (let i = 0; i < 20; i++) { 
                 const texture = PIXI.Assets.get(`vfx_multiplier_orb_${i}`);
                 if (texture) frames.push(texture);
@@ -96,16 +104,21 @@ export class Grid {
         symbolSprite.width = SYMBOL_SIZE * 0.9;
         symbolSprite.height = SYMBOL_SIZE * 0.9;
         symbolSprite.anchor.set(0.5);
-        symbolSprite.x = SYMBOL_SIZE / 2;
-        symbolSprite.y = row * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-        symbolSprite.gridPosition = { col, row };
+        cellContainer.addChild(symbolSprite);
 
-        return symbolSprite;
+        // 3. Настраиваем контейнер
+        cellContainer.x = SYMBOL_SIZE / 2;
+        cellContainer.y = row * SYMBOL_SIZE + SYMBOL_SIZE / 2;
+        cellContainer.gridPosition = { col, row };
+        // Сохраняем ссылку на внутренний спрайт для доступа к multiplierValue
+        cellContainer.symbolSprite = symbolSprite; 
+
+        return cellContainer;
     }
 
     /**
      * Удаляет выигрышные символы с поля с анимацией взрыва.
-     * @param {Array<PIXI.Sprite>} symbolsToRemove - Список спрайтов для удаления.
+     * @param {Array<PIXI.Container>} symbolsToRemove - Список контейнеров для удаления.
      * @returns {Promise<void>}
      */
     async removeSymbols(symbolsToRemove) {
@@ -119,22 +132,22 @@ export class Grid {
             if (texture) explosionFrames.push(texture);
         }
 
-        const animationPromises = symbolsToRemove.map(symbolSprite => {
+        const animationPromises = symbolsToRemove.map(cellContainer => {
             return new Promise(resolve => {
-                const { col, row } = symbolSprite.gridPosition;
+                const { col, row } = cellContainer.gridPosition;
                 this.gridData[col][row] = null;
                 this.gridSprites[col][row] = null;
 
                 const explosion = new PIXI.AnimatedSprite(explosionFrames);
                 explosion.anchor.set(0.5);
                 explosion.scale.set(SYMBOL_SIZE / 192);
-                explosion.x = symbolSprite.x;
-                explosion.y = symbolSprite.y;
+                explosion.x = cellContainer.x;
+                explosion.y = cellContainer.y;
                 explosion.loop = false;
                 explosion.animationSpeed = 0.6;
                 
-                symbolSprite.parent.addChild(explosion);
-                symbolSprite.destroy();
+                cellContainer.parent.addChild(explosion);
+                cellContainer.destroy();
 
                 explosion.onComplete = () => {
                     explosion.destroy();
@@ -173,9 +186,14 @@ export class Grid {
                         sprite.gridPosition.row = newRow;
 
                         const targetY = newRow * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-                        animations.push(this.animateTo(sprite, targetY));
+                        animations.push(this.animateTo(sprite, targetY, 0.4));
                     }
                 }
+            }
+
+            if (animations.length === 0) {
+                resolve();
+                return;
             }
 
             Promise.all(animations).then(() => resolve());
@@ -191,12 +209,14 @@ export class Grid {
             let animations = [];
 
             for (let i = 0; i < REEL_COUNT; i++) {
-                for (let j = 0; j < ROW_COUNT; j++) {
+                let newSymbolsCount = 0;
+                for (let j = ROW_COUNT - 1; j >= 0; j--) {
                     if (this.gridSprites[i][j] === null) {
+                        newSymbolsCount++;
                         const symbolData = this.getRandomSymbol();
                         const sprite = this.createSymbolSprite(symbolData, i, j);
                         
-                        sprite.y = -SYMBOL_SIZE;
+                        sprite.y = -newSymbolsCount * SYMBOL_SIZE + SYMBOL_SIZE / 2;
                         
                         this.gridData[i][j] = symbolData;
                         this.gridSprites[i][j] = sprite;
@@ -204,9 +224,14 @@ export class Grid {
                         this.reelsContainer.children[i].addChild(sprite);
 
                         const targetY = j * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-                        animations.push(this.animateTo(sprite, targetY));
+                        animations.push(this.animateTo(sprite, targetY, 0.4));
                     }
                 }
+            }
+
+            if (animations.length === 0) {
+                resolve();
+                return;
             }
 
             Promise.all(animations).then(() => resolve());
@@ -214,41 +239,43 @@ export class Grid {
     }
 
     /**
-     * Вспомогательная функция для анимации спрайта к цели.
-     * @param {PIXI.Sprite} sprite - Спрайт для анимации.
+     * Вспомогательная функция для плавной анимации спрайта к цели.
+     * @param {PIXI.Container} sprite - Контейнер для анимации.
      * @param {number} targetY - Конечная Y позиция.
+     * @param {number} duration - Длительность анимации в секундах.
+     * @param {number} delay - Задержка перед началом анимации в миллисекундах.
      * @returns {Promise<void>}
      */
-    animateTo(sprite, targetY, speed = 40) {
+    animateTo(sprite, targetY, duration = 0.5, delay = 0) {
         return new Promise(resolve => {
-            const ticker = (delta) => {
-                const diff = targetY - sprite.y;
+            setTimeout(() => {
+                const startY = sprite.y;
+                const change = targetY - startY;
+                let elapsed = 0;
 
-                if (Math.abs(diff) < speed * delta) {
-                    sprite.y = targetY;
-                    this.app.ticker.remove(ticker);
-                    resolve();
-                    return;
-                }
+                const easeOutCubic = (t) => (--t) * t * t + 1;
 
-                sprite.y += Math.sign(diff) * speed * delta;
-            };
-            this.app.ticker.add(ticker);
+                const tickerCallback = (ticker) => {
+                    elapsed += ticker.deltaMS / 1000;
+                    let progress = elapsed / duration;
+                    if (progress > 1) progress = 1;
+
+                    sprite.y = startY + change * easeOutCubic(progress);
+
+                    if (progress === 1) {
+                        this.app.ticker.remove(tickerCallback);
+                        resolve();
+                    }
+                };
+                this.app.ticker.add(tickerCallback);
+            }, delay);
         });
     }
     
-    /**
-     * Возвращает текущее логическое состояние сетки.
-     * @returns {Array<Array<object>>}
-     */
     getGridState() {
         return this.gridData;
     }
 
-    /**
-     * Возвращает двумерный массив ID символов на сетке.
-     * @returns {Array<Array<string>>}
-     */
     getSymbolIds() {
         const ids = [];
         for (let i = 0; i < REEL_COUNT; i++) {
@@ -260,38 +287,47 @@ export class Grid {
         return ids;
     }
 
-    /**
-     * Запускает новый спин: очищает сетку и анимированно сбрасывает новые символы.
-     * @returns {Promise<void>}
-     */
-    spin() {
-        return new Promise(resolve => {
-            this.reelsContainer.children.forEach(reel => reel.removeChildren());
-            this.gridData = [];
-            this.gridSprites = [];
+    async spin() {
+        const REEL_FALL_DELAY = 60;
+        const REEL_DROP_DELAY = 80;
 
-            let animations = [];
+        const fallOutAnimations = [];
+        const allCurrentSprites = this.gridSprites.flat().filter(sprite => sprite !== null);
 
-            for (let i = 0; i < REEL_COUNT; i++) {
-                this.gridData[i] = [];
-                this.gridSprites[i] = [];
-                for (let j = 0; j < ROW_COUNT; j++) {
-                    const symbolData = this.getRandomSymbol();
-                    const sprite = this.createSymbolSprite(symbolData, i, j);
-                    
-                    sprite.y = -(ROW_COUNT - j) * SYMBOL_SIZE;
-                    
-                    this.gridData[i][j] = symbolData;
-                    this.gridSprites[i][j] = sprite;
-                    
-                    this.reelsContainer.children[i].addChild(sprite);
+        for (const sprite of allCurrentSprites) {
+            const col = sprite.gridPosition.col;
+            const delay = (REEL_COUNT - 1 - col) * REEL_FALL_DELAY;
+            const targetY = (ROW_COUNT * SYMBOL_SIZE) + SYMBOL_SIZE;
+            fallOutAnimations.push(this.animateTo(sprite, targetY, 0.4, delay)); 
+        }
+        
+        await Promise.all(fallOutAnimations);
 
-                    const targetY = j * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-                    animations.push(this.animateTo(sprite, targetY));
-                }
+        this.reelsContainer.children.forEach(reel => reel.removeChildren());
+        this.gridData = [];
+        this.gridSprites = [];
+
+        const fallInAnimations = [];
+        for (let i = 0; i < REEL_COUNT; i++) {
+            this.gridData[i] = [];
+            this.gridSprites[i] = [];
+            for (let j = 0; j < ROW_COUNT; j++) {
+                const symbolData = this.getRandomSymbol();
+                const sprite = this.createSymbolSprite(symbolData, i, j);
+                
+                sprite.y = -(ROW_COUNT - j) * SYMBOL_SIZE;
+                
+                this.gridData[i][j] = symbolData;
+                this.gridSprites[i][j] = sprite;
+                
+                this.reelsContainer.children[i].addChild(sprite);
+
+                const targetY = j * SYMBOL_SIZE + SYMBOL_SIZE / 2;
+                const delay = i * REEL_DROP_DELAY;
+                fallInAnimations.push(this.animateTo(sprite, targetY, 0.5, delay));
             }
-
-            Promise.all(animations).then(() => resolve());
-        });
+        }
+        
+        await Promise.all(fallInAnimations);
     }
 }
