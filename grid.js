@@ -68,17 +68,19 @@ export class Grid {
      * @returns {PIXI.Sprite}
      */
     createSymbolSprite(symbolData, col, row) {
-        const symbolSprite = PIXI.Sprite.from(symbolData.id);
-        symbolSprite.width = SYMBOL_SIZE * 0.9;
-        symbolSprite.height = SYMBOL_SIZE * 0.9;
-        symbolSprite.anchor.set(0.5);
-        symbolSprite.x = SYMBOL_SIZE / 2;
-        symbolSprite.y = row * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-        // Сохраняем позицию в сетке для легкого доступа
-        symbolSprite.gridPosition = { col, row };
+        let symbolSprite;
 
-        // Если это множитель, присваиваем ему случайное значение
+        // Если это множитель, создаем анимированный спрайт
         if (symbolData.type === 'multiplier') {
+            const frames = [];
+            for (let i = 0; i < 20; i++) {
+                frames.push(PIXI.Texture.from(`vfx_multiplier_orb_${i}`));
+            }
+            symbolSprite = new PIXI.AnimatedSprite(frames);
+            symbolSprite.animationSpeed = 0.3; // Подобрать скорость
+            symbolSprite.play();
+            
+            // Присваиваем случайное значение множителя
             const randomIndex = Math.floor(Math.random() * symbolData.values.length);
             symbolSprite.multiplierValue = symbolData.values[randomIndex];
             
@@ -87,7 +89,18 @@ export class Grid {
             const valueText = new PIXI.Text(symbolSprite.multiplierValue + 'x', style);
             valueText.anchor.set(0.5);
             symbolSprite.addChild(valueText);
+
+        } else {
+            // Для обычных символов создаем обычный спрайт
+            symbolSprite = PIXI.Sprite.from(symbolData.id);
         }
+
+        symbolSprite.width = SYMBOL_SIZE * 0.9;
+        symbolSprite.height = SYMBOL_SIZE * 0.9;
+        symbolSprite.anchor.set(0.5);
+        symbolSprite.x = SYMBOL_SIZE / 2;
+        symbolSprite.y = row * SYMBOL_SIZE + SYMBOL_SIZE / 2;
+        symbolSprite.gridPosition = { col, row };
 
         return symbolSprite;
     }
@@ -102,12 +115,9 @@ export class Grid {
             return;
         }
 
-        const explosionTexture = PIXI.Assets.get('vfx_symbol_explode');
         const explosionFrames = [];
-        // Нарезаем спрайт-лист 5x3 (кадр 192x192)
         for (let i = 0; i < 15; i++) {
-            const frame = new PIXI.Rectangle((i % 5) * 192, Math.floor(i / 5) * 192, 192, 192);
-            explosionFrames.push(new PIXI.Texture(explosionTexture, frame));
+            explosionFrames.push(PIXI.Texture.from(`vfx_symbol_explode_${i}`));
         }
 
         const animationPromises = symbolsToRemove.map(symbolSprite => {
@@ -118,7 +128,7 @@ export class Grid {
 
                 const explosion = new PIXI.AnimatedSprite(explosionFrames);
                 explosion.anchor.set(0.5);
-                explosion.scale.set(SYMBOL_SIZE / 192); // Масштабируем под размер символа
+                explosion.scale.set(SYMBOL_SIZE / 128); // Масштабируем под размер символа (если кадр 128x128)
                 explosion.x = symbolSprite.x;
                 explosion.y = symbolSprite.y;
                 explosion.loop = false;
