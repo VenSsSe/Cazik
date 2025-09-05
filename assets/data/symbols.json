@@ -1,0 +1,69 @@
+[
+  {
+    "id": "crown",
+    "path": "assets/symbols/symbol_crown.png",
+    "weight": 5,
+    "payouts": { "8-9": 10, "10-11": 25, "12-30": 50 }
+  },
+  {
+    "id": "hourglass",
+    "path": "assets/symbols/symbol_hourglass.png",
+    "weight": 10,
+    "payouts": { "8-9": 2.5, "10-11": 10, "12-30": 25 }
+  },
+  {
+    "id": "ring",
+    "path": "assets/symbols/symbol_ring.png",
+    "weight": 15,
+    "payouts": { "8-9": 2, "10-11": 5, "12-30": 15 }
+  },
+    {
+    "id": "goblet",
+    "path": "assets/symbols/symbol_goblet.png",
+    "weight": 20,
+    "payouts": { "8-9": 1.5, "10-11": 2, "12-30": 12 }
+  },
+  {
+    "id": "gem_red",
+    "path": "assets/symbols/symbol_gem_red.png",
+    "weight": 50,
+    "payouts": { "8-9": 1, "10-11": 1.5, "12-30": 10 }
+  },
+    {
+    "id": "gem_purple",
+    "path": "assets/symbols/symbol_gem_purple.png",
+    "weight": 60,
+    "payouts": { "8-9": 0.8, "10-11": 1.2, "12-30": 8 }
+  },
+  {
+    "id": "gem_yellow",
+    "path": "assets/symbols/symbol_gem_yellow.png",
+    "weight": 80,
+    "payouts": { "8-9": 0.5, "10-11": 1, "12-30": 5 }
+  },
+    {
+    "id": "gem_green",
+    "path": "assets/symbols/symbol_gem_green.png",
+    "weight": 90,
+    "payouts": { "8-9": 0.4, "10-11": 0.9, "12-30": 4 }
+  },
+  {
+    "id": "gem_blue",
+    "path": "assets/symbols/symbol_gem_blue.png",
+    "weight": 100,
+    "payouts": { "8-9": 0.25, "10-11": 0.75, "12-30": 2 }
+  },
+  {
+    "id": "scatter",
+    "path": "assets/symbols/symbol_scatter_zeus.png",
+    "weight": 8,
+    "payouts": { "4": 3, "5": 5, "6": 100 }
+  },
+  {
+    "id": "multiplier",
+    "path": "assets/effects/vfx_multiplier_orb/tile000.png",
+    "weight": 10,
+    "type": "multiplier",
+    "values": [2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 50, 100, 250, 500]
+  }
+]
