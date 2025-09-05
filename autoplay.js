@@ -43,8 +43,8 @@ export class AutoplayManager {
     continue() {
         if (this.isActive) {
             this.spinsRemaining--;
-            // Небольшая задержка перед следующим спином для плавности
-            setTimeout(() => this.spinFunction(), 500);
+            // Увеличим задержку для наглядности
+            setTimeout(() => this.spinFunction(), 1500); // Увеличиваем задержку до 1.5 секунд
         }
     }
 }

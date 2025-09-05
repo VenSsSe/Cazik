@@ -1,4 +1,4 @@
-// --- loader.js (Исправленная и упрощенная версия) ---
+// --- loader.js (ИСПРАВЛЕННАЯ ВЕРСИЯ) ---
 // Этот файл отвечает только за загрузку всех игровых ресурсов
 
 export async function loadAssets() {
@@ -19,15 +19,18 @@ export async function loadAssets() {
         { alias: 'background_olympus', src: 'assets/backgrounds/background_olympus.jpg' },
         { alias: 'reels_background', src: 'assets/backgrounds/reels_background.png' },
         { alias: 'game_board_frame', src: 'assets/ui/frames/game_board_frame.png' },
-        { alias: 'ui_panel_bottom', src: 'assets/ui/panels/ui_panel_bottom.png' },
-        { alias: 'ui_panel_ante', src: 'assets/ui/panels/ui_panel_ante.png' },
+        // { alias: 'ui_panel_bottom', src: 'assets/ui/panels/ui_panel_bottom.png' }, // Удалено, так как панель больше не используется
         { alias: 'logo', src: 'assets/ui/logo/logo.png' },
-        { alias: 'ui_button_spin', src: 'assets/ui/buttons/ui_button_spin.png' },
-        { alias: 'ui_button_plus', src: 'assets/ui/buttons/ui_button_plus.png' },
-        { alias: 'ui_button_minus', src: 'assets/ui/buttons/ui_button_minus.png' },
-        { alias: 'ui_button_autoplay', src: 'assets/ui/buttons/ui_button_autoplay.png' },
-        { alias: 'ui_button_buyfeature', src: 'assets/ui/buttons/ui_button_buyfeature.png' },
-        { alias: 'ui_popup_congrats', src: 'assets/ui/popups/ui_popup_congrats.png' }
+
+        // --- ИЗМЕНЕНО: Обновляем пути к кнопкам и попапам ---
+        { alias: 'ui_button_spin', src: 'assets/ui/buttons/restart.png' },
+        { alias: 'ui_button_plus', src: 'assets/ui/buttons/97.png' },
+        { alias: 'ui_button_minus', src: 'assets/ui/buttons/98.png' },
+        { alias: 'ui_button_autoplay', src: 'assets/ui/buttons/next.png' },
+        { alias: 'ui_button_buyfeature', src: 'assets/ui/buttons/shop.png' },
+        { alias: 'ui_button_ante', src: 'assets/ui/buttons/upgrade.png' }, // Новая кнопка для Анте
+        { alias: 'ui_button_info', src: 'assets/ui/buttons/about.png' },   // Новая кнопка Инфо
+        { alias: 'ui_popup_congrats', src: 'assets/ui/popups/table.png' }  // Новый фон для попапа
     ];
 
     // Добавляем все символы из symbols.json в массив для загрузки

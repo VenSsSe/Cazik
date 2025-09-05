@@ -5,7 +5,6 @@
 const REEL_COUNT = 6;
 const ROW_COUNT = 5;
 const SYMBOL_SIZE = 150; // Размер ячейки для символа
-const ANIMATION_SPEED = 0.5; // Скорость анимации падения
 
 export class Grid {
     constructor(app, symbolsData) {
@@ -29,6 +28,7 @@ export class Grid {
                 return symbol;
             }
         }
+        return this.symbolsData[0];
     }
 
     /**
@@ -70,28 +70,26 @@ export class Grid {
     createSymbolSprite(symbolData, col, row) {
         let symbolSprite;
 
-        // Если это множитель, создаем анимированный спрайт
         if (symbolData.type === 'multiplier') {
             const frames = [];
-            for (let i = 0; i < 20; i++) {
-                frames.push(PIXI.Texture.from(`vfx_multiplier_orb_${i}`));
+            // Собираем кадры анимации vfx_multiplier_orb_0, vfx_multiplier_orb_1 и т.д.
+            for (let i = 0; i < 20; i++) { 
+                const texture = PIXI.Assets.get(`vfx_multiplier_orb_${i}`);
+                if (texture) frames.push(texture);
             }
             symbolSprite = new PIXI.AnimatedSprite(frames);
-            symbolSprite.animationSpeed = 0.3; // Подобрать скорость
+            symbolSprite.animationSpeed = 0.4;
             symbolSprite.play();
             
-            // Присваиваем случайное значение множителя
             const randomIndex = Math.floor(Math.random() * symbolData.values.length);
             symbolSprite.multiplierValue = symbolData.values[randomIndex];
             
-            // Добавляем текст для отображения значения множителя
             const style = new PIXI.TextStyle({ fontSize: 40, fill: '#ffffff', fontWeight: 'bold', stroke: '#000000', strokeThickness: 4 });
             const valueText = new PIXI.Text(symbolSprite.multiplierValue + 'x', style);
             valueText.anchor.set(0.5);
             symbolSprite.addChild(valueText);
 
         } else {
-            // Для обычных символов создаем обычный спрайт
             symbolSprite = PIXI.Sprite.from(symbolData.id);
         }
 
@@ -117,7 +115,8 @@ export class Grid {
 
         const explosionFrames = [];
         for (let i = 0; i < 15; i++) {
-            explosionFrames.push(PIXI.Texture.from(`vfx_symbol_explode_${i}`));
+            const texture = PIXI.Assets.get(`vfx_symbol_explode_${i}`);
+            if (texture) explosionFrames.push(texture);
         }
 
         const animationPromises = symbolsToRemove.map(symbolSprite => {
@@ -128,7 +127,7 @@ export class Grid {
 
                 const explosion = new PIXI.AnimatedSprite(explosionFrames);
                 explosion.anchor.set(0.5);
-                explosion.scale.set(SYMBOL_SIZE / 128); // Масштабируем под размер символа (если кадр 128x128)
+                explosion.scale.set(SYMBOL_SIZE / 192);
                 explosion.x = symbolSprite.x;
                 explosion.y = symbolSprite.y;
                 explosion.loop = false;
@@ -166,16 +165,13 @@ export class Grid {
                         const data = this.gridData[i][j];
                         const newRow = j + emptySlots;
 
-                        // Обновляем логическую и визуальную сетки
                         this.gridSprites[i][newRow] = sprite;
                         this.gridData[i][newRow] = data;
                         this.gridSprites[i][j] = null;
                         this.gridData[i][j] = null;
 
-                        // Обновляем позицию в спрайте
                         sprite.gridPosition.row = newRow;
 
-                        // Анимация падения
                         const targetY = newRow * SYMBOL_SIZE + SYMBOL_SIZE / 2;
                         animations.push(this.animateTo(sprite, targetY));
                     }
@@ -200,8 +196,7 @@ export class Grid {
                         const symbolData = this.getRandomSymbol();
                         const sprite = this.createSymbolSprite(symbolData, i, j);
                         
-                        // Начальная позиция над экраном
-                        sprite.y = -SYMBOL_SIZE; 
+                        sprite.y = -SYMBOL_SIZE;
                         
                         this.gridData[i][j] = symbolData;
                         this.gridSprites[i][j] = sprite;
@@ -224,17 +219,19 @@ export class Grid {
      * @param {number} targetY - Конечная Y позиция.
      * @returns {Promise<void>}
      */
-    animateTo(sprite, targetY) {
+    animateTo(sprite, targetY, speed = 40) {
         return new Promise(resolve => {
             const ticker = (delta) => {
-                const distance = targetY - sprite.y;
-                if (Math.abs(distance) < 5) {
+                const diff = targetY - sprite.y;
+
+                if (Math.abs(diff) < speed * delta) {
                     sprite.y = targetY;
                     this.app.ticker.remove(ticker);
                     resolve();
-                } else {
-                    sprite.y += distance * ANIMATION_SPEED * delta;
+                    return;
                 }
+
+                sprite.y += Math.sign(diff) * speed * delta;
             };
             this.app.ticker.add(ticker);
         });
@@ -263,22 +260,18 @@ export class Grid {
         return ids;
     }
 
-    
-
     /**
      * Запускает новый спин: очищает сетку и анимированно сбрасывает новые символы.
      * @returns {Promise<void>}
      */
     spin() {
         return new Promise(resolve => {
-            // 1. Очищаем контейнеры и данные
             this.reelsContainer.children.forEach(reel => reel.removeChildren());
             this.gridData = [];
             this.gridSprites = [];
 
             let animations = [];
 
-            // 2. Создаем новые символы и анимируем их падение
             for (let i = 0; i < REEL_COUNT; i++) {
                 this.gridData[i] = [];
                 this.gridSprites[i] = [];
@@ -286,7 +279,6 @@ export class Grid {
                     const symbolData = this.getRandomSymbol();
                     const sprite = this.createSymbolSprite(symbolData, i, j);
                     
-                    // Начальная позиция над экраном
                     sprite.y = -(ROW_COUNT - j) * SYMBOL_SIZE;
                     
                     this.gridData[i][j] = symbolData;

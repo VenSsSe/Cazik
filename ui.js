@@ -1,4 +1,4 @@
-// --- ui.js ---
+// --- ui.js (ИСПРАВЛЕННАЯ ВЕРСИЯ) ---
 
 export class UI {
     constructor(app, spinCallback, increaseBet, decreaseBet, anteCallback, buyCallback, autoplayCallback) {
@@ -11,57 +11,58 @@ export class UI {
         this.autoplayCallback = autoplayCallback;
         this.container = new PIXI.Container();
 
-        this.textStyle = new PIXI.TextStyle({ fontFamily: 'Arial', fontSize: 36, fontWeight: 'bold', fill: '#ffffff', stroke: '#000000', strokeThickness: 4 });
+        // --- ИЗМЕНЕНО: Стиль текста под новый дизайн ---
+        this.textStyle = new PIXI.TextStyle({ fontFamily: 'Arial Black', fontSize: 42, fontWeight: '900', fill: '#f7d9a3', stroke: '#5c3a0a', strokeThickness: 5 });
     }
 
     create() {
         this.app.stage.addChild(this.container);
 
+        // --- ИЗМЕНЕНО: Новое расположение и масштаб кнопок ---
+
         // --- Левая панель (Анте и Покупка) ---
-        this.buyButton = this.createButton('ui_button_buyfeature', 200, 400, this.buyCallback, 1.2);
-        this.anteButton = this.createButton('ui_panel_ante', 200, 600, this.anteCallback, 1.2);
+        this.buyButton = this.createButton('ui_button_buyfeature', 180, this.app.screen.height - 250, this.buyCallback, 0.5);
+        this.anteButton = this.createButton('ui_button_ante', 180, this.app.screen.height - 120, this.anteCallback, 0.5);
 
-        // --- Нижняя панель ---
-        const bottomPanel = PIXI.Sprite.from('ui_panel_bottom');
-        bottomPanel.anchor.set(0.5, 1);
-        bottomPanel.width = this.app.screen.width;
-        bottomPanel.height = 150;
-        bottomPanel.x = this.app.screen.width / 2;
-        bottomPanel.y = this.app.screen.height;
-        this.container.addChild(bottomPanel);
+        // --- Нижняя панель УДАЛЕНА для чистоты интерфейса ---
 
-        this.spinButton = this.createButton('ui_button_spin', this.app.screen.width - 250, this.app.screen.height - 75, this.spinCallback);
-        this.autoplayButton = this.createButton('ui_button_autoplay', this.app.screen.width - 450, this.app.screen.height - 75, this.autoplayCallback);
+        // Кнопка Spin по центру
+        this.spinButton = this.createButton('ui_button_spin', this.app.screen.width / 2, this.app.screen.height - 100, this.spinCallback, 0.7);
 
+        // Кнопка Autoplay справа от Spin
+        this.autoplayButton = this.createButton('ui_button_autoplay', this.app.screen.width / 2 + 180, this.app.screen.height - 100, this.autoplayCallback, 0.5);
+
+        // Группа управления ставкой
         const betGroup = new PIXI.Container();
-        betGroup.x = this.app.screen.width / 2 - 150;
-        betGroup.y = this.app.screen.height - 75;
+        betGroup.x = this.app.screen.width / 2 - 350; // Сдвигаем левее
+        betGroup.y = this.app.screen.height - 100; // Немного выше
         this.container.addChild(betGroup);
         
+        // Кнопки "+" и "-"
         betGroup.addChild(
-            this.createButton('ui_button_plus', 100, 0, this.increaseBet),
-            this.createButton('ui_button_minus', -100, 0, this.decreaseBet)
+            this.createButton('ui_button_plus', 120, 0, this.increaseBet, 0.4),
+            this.createButton('ui_button_minus', -120, 0, this.decreaseBet, 0.4)
         );
         this.betText = new PIXI.Text('', this.textStyle);
         this.betText.anchor.set(0.5);
         betGroup.addChild(this.betText);
         
+        // --- ИЗМЕНЕНО: Позиции текста ---
         this.balanceText = new PIXI.Text('', this.textStyle);
         this.balanceText.anchor.set(0, 0.5);
         this.balanceText.x = 50;
-        this.balanceText.y = this.app.screen.height - 75;
+        this.balanceText.y = this.app.screen.height - 100; // Поднимаем выше
         this.container.addChild(this.balanceText);
         
         this.winText = new PIXI.Text('', this.textStyle);
-        this.winText.anchor.set(0.5);
-        this.winText.x = this.app.screen.width / 2 + 250;
-        this.winText.y = this.app.screen.height - 75;
+        this.winText.anchor.set(1, 0.5);
+        this.winText.x = this.app.screen.width - 50; // Сдвигаем к правому краю
+        this.winText.y = this.app.screen.height - 100; // Поднимаем выше
         this.container.addChild(this.winText);
 
-        // --- Элементы для фриспинов (ИСПРАВЛЕНО) ---
+        // --- Элементы для фриспинов (без изменений) ---
         this.fsContainer = new PIXI.Container();
         this.fsContainer.visible = false;
-        // Явно указываем все свойства, чтобы избежать ошибки
         const fsTextStyle = new PIXI.TextStyle({ 
             fontFamily: 'Arial',
             fontSize: 48,
@@ -86,7 +87,13 @@ export class UI {
         button.y = y;
         button.eventMode = 'static';
         button.cursor = 'pointer';
-        button.on('pointerdown', callback);
+
+        // --- ДОБАВЛЕНО: Эффект наведения мыши для интерактивности ---
+        button
+            .on('pointerdown', callback)
+            .on('pointerover', () => button.scale.set(scale * 1.1)) // Увеличиваем при наведении
+            .on('pointerout', () => button.scale.set(scale));      // Возвращаем размер
+
         this.container.addChild(button);
         return button;
     }

@@ -37,15 +37,19 @@ export function calculatePayout(wins, bet, symbolsData) {
         const symbolInfo = symbolsData.find(s => s.id === win.id);
         if (symbolInfo && symbolInfo.payouts) {
             let payoutMultiplier = 0;
-            const tiers = Object.keys(symbolInfo.payouts);
-            for (const tier of tiers) {
-                const [min, max] = tier.includes('-') ? tier.split('-').map(Number) : [Number(tier), Number(tier)];
-                if (win.count >= min && win.count <= (max || 30)) {
-                    payoutMultiplier = symbolInfo.payouts[tier];
+            
+            // Преобразуем тиры в объекты { min, value } и сортируем по min в убывающем порядке
+            const parsedTiers = Object.entries(symbolInfo.payouts).map(([key, value]) => {
+                const parts = key.split('-').map(Number);
+                return { min: parts[0], value: value };
+            }).sort((a, b) => b.min - a.min); // Сортируем от большего к меньшему
+
+            // Находим первый (и самый большой) подходящий тир
+            for (const tier of parsedTiers) {
+                if (win.count >= tier.min) {
+                    payoutMultiplier = tier.value;
+                    break; // Нашли максимальный выигрыш, выходим
                 }
-            }
-            if (win.count >= 12 && symbolInfo.payouts["12-30"]) {
-                 payoutMultiplier = symbolInfo.payouts["12-30"];
             }
             totalPayout += bet * payoutMultiplier;
         }

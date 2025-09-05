@@ -1,4 +1,4 @@
-// --- main.js ---
+// --- main.js (ИСПРАВЛЕННАЯ ВЕРСИЯ) ---
 
 import { loadAssets } from './loader.js';
 import { createScene } from './scene.js';
@@ -19,7 +19,7 @@ let playerBalance = 1000;
 let currentBet = 10;
 const BET_STEP = 1;
 let character;
-// let audioManager;
+let audioManager;
 
 async function init() {
     await app.init({
@@ -29,8 +29,18 @@ async function init() {
     });
     document.body.appendChild(app.view);
 
-    // audioManager = new AudioManager();
-    // audioManager.load();
+    // --- ДОБАВЛЕНО: Исправление для автозапуска звука в браузерах ---
+    const resumeAudio = () => {
+        if (PIXI.sound.context.state === 'suspended') {
+            PIXI.sound.context.resume();
+        }
+        window.removeEventListener('pointerdown', resumeAudio);
+    };
+    window.addEventListener('pointerdown', resumeAudio);
+    // -----------------------------------------
+
+    audioManager = new AudioManager();
+    audioManager.load();
 
     const loadedData = await loadAssets();
     config = loadedData.config;
@@ -71,7 +81,7 @@ function handleBuyBonus() {
     if (playerBalance >= cost) {
         playerBalance -= cost;
         ui.updateBalance(playerBalance);
-        // audioManager.play('buy_bonus_sound');
+        audioManager.play('buy_bonus_sound');
         freeSpinsManager.start(config.freeSpins.initialSpins);
         character.setPowerState(true);
         showCongratsPopup(true); // true означает, что это покупка
@@ -113,7 +123,7 @@ async function startSpin(isFirstFreeSpin = false) {
     if (isSpinning && !isFirstFreeSpin) return;
     isSpinning = true;
 
-    // audioManager.play('spin_sound');
+    audioManager.play('spin_sound');
 
     if (freeSpinsManager.isActive) {
         freeSpinsManager.useSpin();
@@ -140,7 +150,7 @@ async function startSpin(isFirstFreeSpin = false) {
         const { wins, scatterCount } = checkForWins(grid.getSymbolIds());
 
         if (scatterCount >= config.freeSpins.triggerCount && !freeSpinsManager.isActive) {
-            // audioManager.play('bonus_trigger_sound');
+            audioManager.play('bonus_trigger_sound');
             freeSpinsManager.start(config.freeSpins.initialSpins);
             character.setPowerState(true);
             if(autoplayManager.isActive) autoplayManager.stop();
@@ -155,11 +165,26 @@ async function startSpin(isFirstFreeSpin = false) {
         if (wins.length === 0) break;
         
         const payout = calculatePayout(wins, currentBet, symbols);
-        // if (payout > 0) audioManager.play('win_sound');
+        if (payout > 0) audioManager.play('win_sound');
         currentSpinTotalWin += payout;
         
-        let spritesToRemove = wins.flatMap(w => w.positions).map(pos => grid.gridSprites[pos.col][pos.row]);
-        await grid.removeSymbols([...new Set(spritesToRemove)]);
+        const spritesToRemove = [];
+        const winningPositions = new Set(); // Используем Set для избежания дубликатов позиций
+
+        wins.flatMap(w => w.positions).forEach(pos => {
+            // Создаем уникальный ключ для каждой позиции
+            winningPositions.add(`${pos.col}-${pos.row}`);
+        });
+
+        winningPositions.forEach(posKey => {
+            const [col, row] = posKey.split('-').map(Number);
+            // Надежная проверка, что спрайт существует
+            if (grid.gridSprites[col] && grid.gridSprites[col][row]) {
+                spritesToRemove.push(grid.gridSprites[col][row]);
+            }
+        });
+
+        await grid.removeSymbols(spritesToRemove);
         await grid.tumbleDown();
         await grid.refillGrid();
         
@@ -201,19 +226,27 @@ async function startSpin(isFirstFreeSpin = false) {
     }
 }
 
+// --- ИЗМЕНЕНО: Обновление попапа под новый дизайн ---
 function showCongratsPopup(isBought = false) {
     const popup = PIXI.Sprite.from('ui_popup_congrats');
     popup.anchor.set(0.5);
     popup.x = app.screen.width / 2;
     popup.y = app.screen.height / 2;
-    popup.scale.set(0.8);
+    popup.scale.set(1.5); // Увеличиваем масштаб для нового фона
     popup.eventMode = 'static';
     popup.cursor = 'pointer';
 
-    const textStyle = new PIXI.TextStyle({ fontSize: 60, fill: '#FFD700', fontWeight: 'bold', stroke: '#000', strokeThickness: 5 });
+    const textStyle = new PIXI.TextStyle({ 
+        fontFamily: 'Arial Black', 
+        fontSize: 80, 
+        fill: '#FFD700', 
+        fontWeight: 'bold', 
+        stroke: '#4a2500', 
+        strokeThickness: 8 
+    });
     const spinsText = new PIXI.Text(`${freeSpinsManager.spinsLeft} FREE SPINS`, textStyle);
     spinsText.anchor.set(0.5);
-    spinsText.y = 50;
+    spinsText.y = 50; // Можно подобрать положение текста
     popup.addChild(spinsText);
 
     popup.on('pointerdown', () => {
@@ -224,6 +257,7 @@ function showCongratsPopup(isBought = false) {
 
     app.stage.addChild(popup);
 }
+
 
 function resize() {
     const screenWidth = window.innerWidth;

@@ -26,8 +26,8 @@ export function createScene(app) {
     gameFrame.anchor.set(0.5);
     gameFrame.x = app.screen.width / 2;
     gameFrame.y = app.screen.height / 2 - 50; // Смещаем туда же, куда и фон барабанов
-    // Масштабируем раму, чтобы она была чуть больше фона барабанов
-    gameFrame.width = reelsBackground.width + 50;
-    gameFrame.height = reelsBackground.height + 50;
+    // Масштабируем раму пропорционально, чтобы она красиво обрамляла фон барабанов
+    const frameScale = (reelsBackground.width + 50) / gameFrame.texture.width;
+    gameFrame.scale.set(frameScale);
     app.stage.addChild(gameFrame);
 }
