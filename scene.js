@@ -1,5 +1,4 @@
 // --- scene.js ---
-// Этот файл отвечает за создание и отображение всех статичных элементов сцены
 
 export function createScene(app) {
     // Основной фон
@@ -7,26 +6,28 @@ export function createScene(app) {
     background.anchor.set(0.5);
     background.x = app.screen.width / 2;
     background.y = app.screen.height / 2;
-    const bgScale = Math.max(app.screen.width / background.texture.width, app.screen.height / background.texture.height);
+    // Масштабируем фон так, чтобы он покрывал весь экран
+    const bgScale = Math.max(app.screen.width / background.width, app.screen.height / background.height);
     background.scale.set(bgScale);
     app.stage.addChild(background);
 
-    // Фон для барабанов
+    // Фон для барабанов (сетки символов)
     const reelsBackground = PIXI.Sprite.from('reels_background');
     reelsBackground.anchor.set(0.5);
     reelsBackground.x = app.screen.width / 2;
-    reelsBackground.y = app.screen.height / 2;
+    reelsBackground.y = app.screen.height / 2 - 50; // Немного смещаем вверх
+    // Задаем точный размер, соответствующий сетке 6x5
+    reelsBackground.width = 900; // 6 колонок * 150px
+    reelsBackground.height = 750; // 5 рядов * 150px
     app.stage.addChild(reelsBackground);
 
-     // Рамка игрового поля
+    // Рамка игрового поля
     const gameFrame = PIXI.Sprite.from('game_board_frame');
     gameFrame.anchor.set(0.5);
     gameFrame.x = app.screen.width / 2;
-    gameFrame.y = app.screen.height / 2;
-    //gameFrame.scale.set(1.05); // Небольшое увеличение для лучшего вида
+    gameFrame.y = app.screen.height / 2 - 50; // Смещаем туда же, куда и фон барабанов
+    // Масштабируем раму, чтобы она была чуть больше фона барабанов
+    gameFrame.width = reelsBackground.width + 50;
+    gameFrame.height = reelsBackground.height + 50;
     app.stage.addChild(gameFrame);
-
-    // Нижняя панель UI и кнопка спина теперь создаются в ui.js
-
-    console.log("Сцена успешно создана!");
 }

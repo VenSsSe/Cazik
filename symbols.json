@@ -58,5 +58,12 @@
     "path": "assets/symbols/symbol_scatter_zeus.png",
     "weight": 3,
     "payouts": { "4": 3, "5": 5, "6": 100 }
+  },
+  {
+    "id": "multiplier",
+    "path": "assets/effects/vfx_multiplier_orb.png",
+    "weight": 10,
+    "type": "multiplier",
+    "values": [2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 50, 100, 250, 500]
   }
 ]

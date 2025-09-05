@@ -1,84 +1,89 @@
 // --- ui.js ---
-// Отвечает за создание и управление всеми элементами интерфейса
 
 export class UI {
-    constructor(app, spinCallback) {
+    constructor(app, spinCallback, increaseBet, decreaseBet) {
         this.app = app;
         this.spinCallback = spinCallback;
+        this.increaseBet = increaseBet;
+        this.decreaseBet = decreaseBet;
+        this.container = new PIXI.Container();
 
-        // Стили для текста
         this.textStyle = new PIXI.TextStyle({
             fontFamily: 'Arial',
-            fontSize: 48,
+            fontSize: 36,
             fontWeight: 'bold',
-            fill: '#ffffff', // градиент
-            stroke: '#4a1850',
-            strokeThickness: 5,
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 4,
         });
     }
 
     create() {
-        // Нижняя панель UI
+        this.app.stage.addChild(this.container);
+
+        // Нижняя панель
         const bottomPanel = PIXI.Sprite.from('ui_panel_bottom');
         bottomPanel.anchor.set(0.5, 1);
+        bottomPanel.width = this.app.screen.width;
+        bottomPanel.height = 150;
         bottomPanel.x = this.app.screen.width / 2;
         bottomPanel.y = this.app.screen.height;
-        this.app.stage.addChild(bottomPanel);
+        this.container.addChild(bottomPanel);
 
-        // Кнопка спина
-        const spinButton = PIXI.Sprite.from('ui_button_spin');
-        spinButton.anchor.set(0.5);
-        spinButton.x = this.app.screen.width / 2 + 450;
-        spinButton.y = this.app.screen.height - bottomPanel.height / 2;
-        spinButton.eventMode = 'static';
-        spinButton.cursor = 'pointer';
-        spinButton.on('pointerdown', this.spinCallback);
-        this.app.stage.addChild(spinButton);
+        // --- Кнопка Спина (в центре) ---
+        const spinButton = this.createButton('ui_button_spin', 0, 0, this.spinCallback);
+        spinButton.x = this.app.screen.width - 250;
+        spinButton.y = this.app.screen.height - 75;
 
-        // Текст Баланса
-        this.balanceText = new PIXI.Text('', this.textStyle);
-        this.balanceText.anchor.set(0.5);
-        this.balanceText.x = this.app.screen.width / 2 - 400;
-        this.balanceText.y = this.app.screen.height - bottomPanel.height / 2;
-        this.app.stage.addChild(this.balanceText);
-
-        // Текст Ставки
+        // --- Управление ставкой ---
+        const betGroup = new PIXI.Container();
+        this.container.addChild(betGroup);
+        betGroup.x = this.app.screen.width / 2 - 150;
+        betGroup.y = this.app.screen.height - 75;
+        
+        const plusButton = this.createButton('ui_button_plus', 100, 0, this.increaseBet);
+        const minusButton = this.createButton('ui_button_minus', -100, 0, this.decreaseBet);
         this.betText = new PIXI.Text('', this.textStyle);
         this.betText.anchor.set(0.5);
-        this.betText.x = this.app.screen.width / 2;
-        this.betText.y = this.app.screen.height - bottomPanel.height / 2;
-        this.app.stage.addChild(this.betText);
-
-        // Текст Выигрыша
+        
+        betGroup.addChild(plusButton, minusButton, this.betText);
+        
+        // --- Отображение баланса и выигрыша ---
+        this.balanceText = new PIXI.Text('', this.textStyle);
+        this.balanceText.anchor.set(0, 0.5);
+        this.balanceText.x = 50;
+        this.balanceText.y = this.app.screen.height - 75;
+        this.container.addChild(this.balanceText);
+        
         this.winText = new PIXI.Text('', this.textStyle);
         this.winText.anchor.set(0.5);
-        this.winText.x = this.app.screen.width / 2 + 200;
-        this.winText.y = this.app.screen.height - bottomPanel.height / 2;
-        this.app.stage.addChild(this.winText);
-
-        console.log("UI создан!");
+        this.winText.x = this.app.screen.width / 2 + 250;
+        this.winText.y = this.app.screen.height - 75;
+        this.container.addChild(this.winText);
+    }
+    
+    // Вспомогательная функция для создания кнопок
+    createButton(texture, x, y, callback) {
+        const button = PIXI.Sprite.from(texture);
+        button.anchor.set(0.5);
+        button.scale.set(0.8);
+        button.x = x;
+        button.y = y;
+        button.eventMode = 'static';
+        button.cursor = 'pointer';
+        button.on('pointerdown', callback);
+        this.container.addChild(button);
+        return button;
     }
 
-    /**
-     * Обновляет текст баланса
-     * @param {number} value - новое значение баланса
-     */
     updateBalance(value) {
         this.balanceText.text = `Balance: ${value.toFixed(2)}`;
     }
 
-    /**
-     * Обновляет текст ставки
-     * @param {number} value - новое значение ставки
-     */
     updateBet(value) {
         this.betText.text = `Bet: ${value.toFixed(2)}`;
     }
 
-    /**
-     * Обновляет текст выигрыша
-     * @param {number} value - новое значение выигрыша
-     */
     updateWin(value) {
         this.winText.text = `Win: ${value.toFixed(2)}`;
     }

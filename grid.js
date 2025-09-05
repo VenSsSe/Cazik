@@ -52,8 +52,9 @@ export class Grid {
             }
         }
 
+        // Позиционируем контейнер точно в центре фона барабанов
         this.reelsContainer.x = (this.app.screen.width - this.reelsContainer.width) / 2;
-        this.reelsContainer.y = (this.app.screen.height - this.reelsContainer.height) / 2;
+        this.reelsContainer.y = (this.app.screen.height - this.reelsContainer.height) / 2 - 50; // Смещаем вверх
         
         this.app.stage.addChild(this.reelsContainer);
         console.log("Сетка символов успешно создана!");
@@ -75,60 +76,66 @@ export class Grid {
         symbolSprite.y = row * SYMBOL_SIZE + SYMBOL_SIZE / 2;
         // Сохраняем позицию в сетке для легкого доступа
         symbolSprite.gridPosition = { col, row };
+
+        // Если это множитель, присваиваем ему случайное значение
+        if (symbolData.type === 'multiplier') {
+            const randomIndex = Math.floor(Math.random() * symbolData.values.length);
+            symbolSprite.multiplierValue = symbolData.values[randomIndex];
+            
+            // Добавляем текст для отображения значения множителя
+            const style = new PIXI.TextStyle({ fontSize: 40, fill: '#ffffff', fontWeight: 'bold', stroke: '#000000', strokeThickness: 4 });
+            const valueText = new PIXI.Text(symbolSprite.multiplierValue + 'x', style);
+            valueText.anchor.set(0.5);
+            symbolSprite.addChild(valueText);
+        }
+
         return symbolSprite;
     }
 
     /**
-     * Удаляет выигрышные символы с поля.
+     * Удаляет выигрышные символы с поля с анимацией взрыва.
      * @param {Array<PIXI.Sprite>} symbolsToRemove - Список спрайтов для удаления.
      * @returns {Promise<void>}
      */
-    removeSymbols(symbolsToRemove) {
-        return new Promise(resolve => {
-            if (symbolsToRemove.length === 0) {
-                resolve();
-                return;
-            }
+    async removeSymbols(symbolsToRemove) {
+        if (symbolsToRemove.length === 0) {
+            return;
+        }
 
-            let explosionsPending = symbolsToRemove.length;
+        const explosionTexture = PIXI.Assets.get('vfx_symbol_explode');
+        const explosionFrames = [];
+        // Нарезаем спрайт-лист 5x3 (кадр 192x192)
+        for (let i = 0; i < 15; i++) {
+            const frame = new PIXI.Rectangle((i % 5) * 192, Math.floor(i / 5) * 192, 192, 192);
+            explosionFrames.push(new PIXI.Texture(explosionTexture, frame));
+        }
 
-            symbolsToRemove.forEach(symbolSprite => {
-                // Помечаем ячейку как пустую
+        const animationPromises = symbolsToRemove.map(symbolSprite => {
+            return new Promise(resolve => {
                 const { col, row } = symbolSprite.gridPosition;
                 this.gridData[col][row] = null;
                 this.gridSprites[col][row] = null;
 
-                // Создаем анимацию взрыва
-                const explosionTextures = [];
-                for (let i = 0; i < 30; i++) { // Предполагаем, что у нас есть кадры для анимации
-                     explosionTextures.push(PIXI.Texture.from(`vfx_symbol_explode_${i}.png`)); // Это нужно будет адаптировать к вашему спрайт-листу
-                }
-                // Fallback if spritesheet is not ready
-                if(explosionTextures.length === 0) {
-                    explosionTextures.push(PIXI.Texture.from('vfx_symbol_explode.png'));
-                }
-
-                const explosion = new PIXI.AnimatedSprite(explosionTextures);
+                const explosion = new PIXI.AnimatedSprite(explosionFrames);
                 explosion.anchor.set(0.5);
+                explosion.scale.set(SYMBOL_SIZE / 192); // Масштабируем под размер символа
                 explosion.x = symbolSprite.x;
                 explosion.y = symbolSprite.y;
                 explosion.loop = false;
                 explosion.animationSpeed = 0.6;
                 
                 symbolSprite.parent.addChild(explosion);
+                symbolSprite.destroy();
 
                 explosion.onComplete = () => {
                     explosion.destroy();
-                    explosionsPending--;
-                    if (explosionsPending === 0) {
-                        resolve();
-                    }
+                    resolve();
                 };
-
                 explosion.play();
-                symbolSprite.destroy();
             });
         });
+        
+        await Promise.all(animationPromises);
     }
 
     /**
