@@ -1,34 +1,56 @@
 /**
  * Checks the grid for winning combinations (8+ identical symbols).
- * Scatter symbols are handled separately.
- * @param {Array<Array<object>>} grid - A 2D array representing the grid, where each element is a symbol object { id: 'symbol_name' }.
- * @returns {Array<object>} - An array of winning combinations, e.g., [{ id: 'gem_blue', count: 9 }].
+ * @param {Array<Array<string>>} gridSymbolIds - A 2D array of symbol IDs.
+ * @returns {Array<object>} - An array of winning combinations, e.g., [{ id: 'gem_blue', count: 9, positions: [{col: 0, row: 1}, ...] }].
  */
-export function checkForWins(grid) {
+export function checkForWins(gridSymbolIds) {
     const symbolCounts = {};
-    const wins = [];
+    const symbolPositions = {};
 
-    // Flatten the grid and count symbol occurrences
-    grid.flat().forEach(symbol => {
-        if (symbol && symbol.id) {
-            // Don't count scatters for the main win condition
-            if (symbol.id !== 'scatter') {
-                symbolCounts[symbol.id] = (symbolCounts[symbol.id] || 0) + 1;
+    // 1. Iterate through the grid to count symbols and record their positions
+    for (let i = 0; i < gridSymbolIds.length; i++) {
+        for (let j = 0; j < gridSymbolIds[i].length; j++) {
+            const symbolId = gridSymbolIds[i][j];
+            if (symbolId) {
+                if (symbolId !== 'scatter') { // Scatters are often handled differently
+                    symbolCounts[symbolId] = (symbolCounts[symbolId] || 0) + 1;
+                    if (!symbolPositions[symbolId]) {
+                        symbolPositions[symbolId] = [];
+                    }
+                    symbolPositions[symbolId].push({ col: i, row: j });
+                }
             }
         }
-    });
+    }
 
-    // Check for winning counts (8 or more)
+    const wins = [];
+
+    // 2. Check for winning counts (8 or more)
     for (const symbolId in symbolCounts) {
         if (symbolCounts[symbolId] >= 8) {
-            wins.push({ id: symbolId, count: symbolCounts[symbolId] });
+            wins.push({
+                id: symbolId,
+                count: symbolCounts[symbolId],
+                positions: symbolPositions[symbolId]
+            });
         }
     }
-    
-    // Handle scatter wins separately
-    const scatterCount = grid.flat().filter(s => s && s.id === 'scatter').length;
-    if (scatterCount >= 4) {
-        wins.push({ id: 'scatter', count: scatterCount });
+
+    // 3. Handle scatter wins separately
+    const scatterPositions = [];
+    for (let i = 0; i < gridSymbolIds.length; i++) {
+        for (let j = 0; j < gridSymbolIds[i].length; j++) {
+            if (gridSymbolIds[i][j] === 'scatter') {
+                scatterPositions.push({ col: i, row: j });
+            }
+        }
+    }
+    if (scatterPositions.length >= 4) {
+        wins.push({
+            id: 'scatter',
+            count: scatterPositions.length,
+            positions: scatterPositions
+        });
     }
 
     return wins;

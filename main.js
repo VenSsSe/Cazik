@@ -2,6 +2,7 @@ import { loadAssets } from './loader.js';
 import { createScene } from './scene.js';
 import { Grid } from './grid.js';
 import { checkForWins, calculatePayout } from './gameLogic.js';
+import { UI } from './ui.js';
 
 const app = new PIXI.Application();
 
@@ -9,6 +10,7 @@ const app = new PIXI.Application();
 let config;
 let symbols;
 let grid;
+let ui;
 let isSpinning = false;
 let playerBalance = 1000; // Начальный баланс
 let currentBet = 10; // Начальная ставка
@@ -32,13 +34,16 @@ async function init() {
     grid = new Grid(app, symbols);
     grid.create(); // Создаем начальную сетку
 
-    // Временный запуск спина по клику
-    app.view.interactive = true;
-    app.view.on('pointerdown', startSpin);
+    // Создаем и настраиваем UI
+    ui = new UI(app, startSpin);
+    ui.create();
+    ui.updateBalance(playerBalance);
+    ui.updateBet(currentBet);
+    ui.updateWin(0);
 
     window.addEventListener('resize', resize);
     resize();
-    console.log("Игра готова. Кликните, чтобы начать спин.");
+    console.log("Игра готова. Нажмите кнопку Spin.");
 }
 
 /**
@@ -48,9 +53,10 @@ async function startSpin() {
     if (isSpinning) return; // Не позволяем запускать новый спин, пока текущий не закончен
     isSpinning = true;
 
-    console.log("--- Новый спин --- Ставка:", currentBet);
     playerBalance -= currentBet;
-    // TODO: Обновить UI баланса
+    ui.updateBalance(playerBalance);
+    ui.updateWin(0);
+    console.log("--- Новый спин --- Ставка:", currentBet);
 
     let currentSpinTotalWin = 0;
 
@@ -59,8 +65,8 @@ async function startSpin() {
 
     // 2. Запускаем цикл падений (Tumble Loop)
     while (true) {
-        const gridState = grid.getGridState();
-        const wins = checkForWins(gridState);
+        const gridSymbolIds = grid.getSymbolIds();
+        const wins = checkForWins(gridSymbolIds);
 
         if (wins.length === 0) {
             // Выигрышей нет, выходим из цикла
@@ -73,19 +79,20 @@ async function startSpin() {
         // Рассчитываем и начисляем выигрыш за каскад
         const payout = calculatePayout(wins, currentBet, symbols);
         currentSpinTotalWin += payout;
+        ui.updateWin(currentSpinTotalWin);
         console.log(`Выигрыш за каскад: ${payout.toFixed(2)}. Общий выигрыш за спин: ${currentSpinTotalWin.toFixed(2)}`);
-        // TODO: Обновить UI выигрыша
 
-        // Собираем все спрайты, которые нужно удалить
+        // Собираем все спрайты, которые нужно удалить, используя позиции из wins
         let spritesToRemove = [];
         for (const win of wins) {
-            // Scatter символы не удаляются стандартным образом, если только это не часть логики
-            if (win.id !== 'scatter') { 
-                spritesToRemove.push(...grid.findSymbolSprites(win.id));
+            for (const pos of win.positions) {
+                const sprite = grid.gridSprites[pos.col][pos.row];
+                if (sprite) {
+                    spritesToRemove.push(sprite);
+                }
             }
         }
-        // Убираем дубликаты, если символ участвует в нескольких комбинациях (маловероятно с текущей логикой)
-        spritesToRemove = [...new Set(spritesToRemove)];
+        spritesToRemove = [...new Set(spritesToRemove)]; // Убираем дубликаты
 
         // 3. Анимация удаления символов
         await grid.removeSymbols(spritesToRemove);
@@ -100,10 +107,10 @@ async function startSpin() {
     }
 
     // 6. Завершение спина
-    console.log(`--- Спин завершен --- Общий выигрыш: ${currentSpinTotalWin.toFixed(2)}`);
     playerBalance += currentSpinTotalWin;
+    ui.updateBalance(playerBalance);
+    console.log(`--- Спин завершен --- Общий выигрыш: ${currentSpinTotalWin.toFixed(2)}`);
     console.log(`Итоговый баланс: ${playerBalance.toFixed(2)}`);
-    // TODO: Обновить UI баланса
 
     isSpinning = false;
 }

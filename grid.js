@@ -232,21 +232,21 @@ export class Grid {
     }
 
     /**
-     * Находит все спрайты определенного символа на сетке.
-     * @param {string} symbolId - ID символа для поиска.
-     * @returns {Array<PIXI.Sprite>}
+     * Возвращает двумерный массив ID символов на сетке.
+     * @returns {Array<Array<string>>}
      */
-    findSymbolSprites(symbolId) {
-        const sprites = [];
+    getSymbolIds() {
+        const ids = [];
         for (let i = 0; i < REEL_COUNT; i++) {
+            ids[i] = [];
             for (let j = 0; j < ROW_COUNT; j++) {
-                if (this.gridData[i][j] && this.gridData[i][j].id === symbolId) {
-                    sprites.push(this.gridSprites[i][j]);
-                }
+                ids[i][j] = this.gridData[i][j] ? this.gridData[i][j].id : null;
             }
         }
-        return sprites;
+        return ids;
     }
+
+    
 
     /**
      * Запускает новый спин: очищает сетку и анимированно сбрасывает новые символы.
