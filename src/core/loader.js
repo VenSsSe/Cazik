@@ -35,9 +35,11 @@ export async function loadAssets() {
 
     // Добавляем все символы из symbols.json в массив для загрузки
     symbols.forEach(symbol => {
-        if (symbol.path) {
-            // Пути в symbols.json уже относительные (e.g., assets/symbols/...), оставляем как есть
-            imagePaths.push({ alias: symbol.id, src: symbol.path });
+        // Загружаем статичную версию
+        imagePaths.push({ alias: symbol.id, src: symbol.path });
+        // Если есть анимированная, тоже загружаем
+        if (symbol.path_animated) {
+            imagePaths.push({ alias: `${symbol.id}_animated`, src: symbol.path_animated });
         }
     });
 

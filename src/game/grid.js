@@ -1,5 +1,6 @@
-// --- grid.js ---
-// Управляет созданием и заполнением сетки символов 6x5
+// --- grid.js (Refactored) ---
+import * as animations from './grid-animations.js';
+import * as helpers from './grid-helpers.js';
 
 // Константы для сетки
 const REEL_COUNT = 6;
@@ -14,21 +15,11 @@ export class Grid {
         this.gridData = []; // Логическая сетка (данные символов)
         this.gridSprites = []; // Визуальная сетка (спрайты символов)
         this.totalWeight = this.symbolsData.reduce((sum, symbol) => sum + symbol.weight, 0);
-    }
 
-    /**
-     * Выбирает случайный символ с учетом его веса (шанса выпадения).
-     * @returns {object} - Данные о случайном символе из symbols.json.
-     */
-    getRandomSymbol() {
-        let randomWeight = Math.random() * this.totalWeight;
-        for (const symbol of this.symbolsData) {
-            randomWeight -= symbol.weight;
-            if (randomWeight <= 0) {
-                return symbol;
-            }
-        }
-        return this.symbolsData[0];
+        // Привязываем константы к экземпляру для доступа из внешних функций
+        this.REEL_COUNT = REEL_COUNT;
+        this.ROW_COUNT = ROW_COUNT;
+        this.SYMBOL_SIZE = SYMBOL_SIZE;
     }
 
     /**
@@ -71,14 +62,12 @@ export class Grid {
         const cellContainer = new PIXI.Container();
         let symbolSprite;
 
-        // 1. Создаем рамку ячейки
         const frame = PIXI.Sprite.from('symbol_grid_frame');
         frame.width = SYMBOL_SIZE;
         frame.height = SYMBOL_SIZE;
         frame.anchor.set(0.5);
         cellContainer.addChild(frame);
 
-        // 2. Создаем сам символ (обычный или анимированный множитель)
         if (symbolData.type === 'multiplier') {
             const frames = [];
             for (let i = 0; i < 20; i++) { 
@@ -86,7 +75,7 @@ export class Grid {
                 if (texture) frames.push(texture);
             }
             symbolSprite = new PIXI.AnimatedSprite(frames);
-            symbolSprite.animationSpeed = 0.4;
+            symbolSprite.animationSpeed = 0.2;
             symbolSprite.play();
             
             const randomIndex = Math.floor(Math.random() * symbolData.values.length);
@@ -106,172 +95,14 @@ export class Grid {
         symbolSprite.anchor.set(0.5);
         cellContainer.addChild(symbolSprite);
 
-        // 3. Настраиваем контейнер
         cellContainer.x = SYMBOL_SIZE / 2;
         cellContainer.y = row * SYMBOL_SIZE + SYMBOL_SIZE / 2;
         cellContainer.gridPosition = { col, row };
-        // Сохраняем ссылку на внутренний спрайт для доступа к multiplierValue
         cellContainer.symbolSprite = symbolSprite; 
 
         return cellContainer;
     }
 
-    /**
-     * Удаляет выигрышные символы с поля с анимацией взрыва.
-     * @param {Array<PIXI.Container>} symbolsToRemove - Список контейнеров для удаления.
-     * @returns {Promise<void>}
-     */
-    async removeSymbols(symbolsToRemove) {
-        if (symbolsToRemove.length === 0) {
-            return;
-        }
-
-        const explosionFrames = [];
-        for (let i = 0; i < 15; i++) {
-            const texture = PIXI.Assets.get(`vfx_symbol_explode_${i}`);
-            if (texture) explosionFrames.push(texture);
-        }
-
-        const animationPromises = symbolsToRemove.map(cellContainer => {
-            return new Promise(resolve => {
-                const { col, row } = cellContainer.gridPosition;
-                this.gridData[col][row] = null;
-                this.gridSprites[col][row] = null;
-
-                const explosion = new PIXI.AnimatedSprite(explosionFrames);
-                explosion.anchor.set(0.5);
-                explosion.scale.set(SYMBOL_SIZE / 192);
-                explosion.x = cellContainer.x;
-                explosion.y = cellContainer.y;
-                explosion.loop = false;
-                explosion.animationSpeed = 0.6;
-                
-                cellContainer.parent.addChild(explosion);
-                cellContainer.destroy();
-
-                explosion.onComplete = () => {
-                    explosion.destroy();
-                    resolve();
-                };
-                explosion.play();
-            });
-        });
-        
-        await Promise.all(animationPromises);
-    }
-
-    /**
-     * Реализует механику "падения" символов вниз.
-     * @returns {Promise<void>}
-     */
-    tumbleDown() {
-        return new Promise(resolve => {
-            let animations = [];
-
-            for (let i = 0; i < REEL_COUNT; i++) {
-                let emptySlots = 0;
-                for (let j = ROW_COUNT - 1; j >= 0; j--) {
-                    if (this.gridSprites[i][j] === null) {
-                        emptySlots++;
-                    } else if (emptySlots > 0) {
-                        const sprite = this.gridSprites[i][j];
-                        const data = this.gridData[i][j];
-                        const newRow = j + emptySlots;
-
-                        this.gridSprites[i][newRow] = sprite;
-                        this.gridData[i][newRow] = data;
-                        this.gridSprites[i][j] = null;
-                        this.gridData[i][j] = null;
-
-                        sprite.gridPosition.row = newRow;
-
-                        const targetY = newRow * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-                        animations.push(this.animateTo(sprite, targetY, 0.4));
-                    }
-                }
-            }
-
-            if (animations.length === 0) {
-                resolve();
-                return;
-            }
-
-            Promise.all(animations).then(() => resolve());
-        });
-    }
-
-    /**
-     * Заполняет пустые места новыми символами сверху.
-     * @returns {Promise<void>}
-     */
-    refillGrid() {
-        return new Promise(resolve => {
-            let animations = [];
-
-            for (let i = 0; i < REEL_COUNT; i++) {
-                let newSymbolsCount = 0;
-                for (let j = ROW_COUNT - 1; j >= 0; j--) {
-                    if (this.gridSprites[i][j] === null) {
-                        newSymbolsCount++;
-                        const symbolData = this.getRandomSymbol();
-                        const sprite = this.createSymbolSprite(symbolData, i, j);
-                        
-                        sprite.y = -newSymbolsCount * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-                        
-                        this.gridData[i][j] = symbolData;
-                        this.gridSprites[i][j] = sprite;
-                        
-                        this.reelsContainer.children[i].addChild(sprite);
-
-                        const targetY = j * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-                        animations.push(this.animateTo(sprite, targetY, 0.4));
-                    }
-                }
-            }
-
-            if (animations.length === 0) {
-                resolve();
-                return;
-            }
-
-            Promise.all(animations).then(() => resolve());
-        });
-    }
-
-    /**
-     * Вспомогательная функция для плавной анимации спрайта к цели.
-     * @param {PIXI.Container} sprite - Контейнер для анимации.
-     * @param {number} targetY - Конечная Y позиция.
-     * @param {number} duration - Длительность анимации в секундах.
-     * @param {number} delay - Задержка перед началом анимации в миллисекундах.
-     * @returns {Promise<void>}
-     */
-    animateTo(sprite, targetY, duration = 0.5, delay = 0) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const startY = sprite.y;
-                const change = targetY - startY;
-                let elapsed = 0;
-
-                const easeOutCubic = (t) => (--t) * t * t + 1;
-
-                const tickerCallback = (ticker) => {
-                    elapsed += ticker.deltaMS / 1000;
-                    let progress = elapsed / duration;
-                    if (progress > 1) progress = 1;
-
-                    sprite.y = startY + change * easeOutCubic(progress);
-
-                    if (progress === 1) {
-                        this.app.ticker.remove(tickerCallback);
-                        resolve();
-                    }
-                };
-                this.app.ticker.add(tickerCallback);
-            }, delay);
-        });
-    }
-    
     getGridState() {
         return this.gridData;
     }
@@ -286,48 +117,9 @@ export class Grid {
         }
         return ids;
     }
-
-    async spin() {
-        const REEL_FALL_DELAY = 60;
-        const REEL_DROP_DELAY = 80;
-
-        const fallOutAnimations = [];
-        const allCurrentSprites = this.gridSprites.flat().filter(sprite => sprite !== null);
-
-        for (const sprite of allCurrentSprites) {
-            const col = sprite.gridPosition.col;
-            const delay = (REEL_COUNT - 1 - col) * REEL_FALL_DELAY;
-            const targetY = (ROW_COUNT * SYMBOL_SIZE) + SYMBOL_SIZE;
-            fallOutAnimations.push(this.animateTo(sprite, targetY, 0.4, delay)); 
-        }
-        
-        await Promise.all(fallOutAnimations);
-
-        this.reelsContainer.children.forEach(reel => reel.removeChildren());
-        this.gridData = [];
-        this.gridSprites = [];
-
-        const fallInAnimations = [];
-        for (let i = 0; i < REEL_COUNT; i++) {
-            this.gridData[i] = [];
-            this.gridSprites[i] = [];
-            for (let j = 0; j < ROW_COUNT; j++) {
-                const symbolData = this.getRandomSymbol();
-                const sprite = this.createSymbolSprite(symbolData, i, j);
-                
-                sprite.y = -(ROW_COUNT - j) * SYMBOL_SIZE;
-                
-                this.gridData[i][j] = symbolData;
-                this.gridSprites[i][j] = sprite;
-                
-                this.reelsContainer.children[i].addChild(sprite);
-
-                const targetY = j * SYMBOL_SIZE + SYMBOL_SIZE / 2;
-                const delay = i * REEL_DROP_DELAY;
-                fallInAnimations.push(this.animateTo(sprite, targetY, 0.5, delay));
-            }
-        }
-        
-        await Promise.all(fallInAnimations);
-    }
 }
+
+// Присваиваем импортированные функции прототипу класса Grid
+// Это позволяет им вызываться как методы экземпляра (this.spin(), this.animateTo(), и т.д.)
+Object.assign(Grid.prototype, animations);
+Object.assign(Grid.prototype, helpers);

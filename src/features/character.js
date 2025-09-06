@@ -23,7 +23,7 @@ export class Character {
     addToScene() {
         this.sprite = new PIXI.AnimatedSprite(this.baseFrames);
         
-        this.sprite.animationSpeed = 0.25; // Можно подобрать скорость
+        this.sprite.animationSpeed = 0.125; // Можно подобрать скорость
         this.sprite.play();
         this.sprite.anchor.set(0.5);
         this.sprite.scale.set(4); // Увеличиваем кота
