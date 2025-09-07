@@ -39,9 +39,11 @@ export class UI {
         this.container.addChild(betGroup);
         
         // Кнопки "+" и "-"
+        this.increaseBetButton = this.createButton('ui_button_plus', 120, 0, this.increaseBet, 0.4);
+        this.decreaseBetButton = this.createButton('ui_button_minus', -120, 0, this.decreaseBet, 0.4);
         betGroup.addChild(
-            this.createButton('ui_button_plus', 120, 0, this.increaseBet, 0.4),
-            this.createButton('ui_button_minus', -120, 0, this.decreaseBet, 0.4)
+            this.increaseBetButton,
+            this.decreaseBetButton
         );
         this.betText = new PIXI.Text('', this.textStyle);
         this.betText.anchor.set(0.5);
@@ -77,6 +79,21 @@ export class UI {
         this.fsText.y = 50;
         this.fsContainer.addChild(this.fsText);
         this.app.stage.addChild(this.fsContainer);
+
+        // Табло выигрыша за падение
+        const tumbleWinStyle = new PIXI.TextStyle({
+            fontFamily: 'Arial Black',
+            fontSize: 36,
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 6
+        });
+        this.tumbleWinText = new PIXI.Text('', tumbleWinStyle);
+        this.tumbleWinText.anchor.set(0.5);
+        this.tumbleWinText.x = this.app.screen.width / 2;
+        this.tumbleWinText.y = 120; // Position it above the grid
+        this.tumbleWinText.visible = false;
+        this.container.addChild(this.tumbleWinText);
     }
     
     createButton(texture, x, y, callback, scale = 0.8) {
@@ -122,5 +139,116 @@ export class UI {
 
     updateFreeSpins(count) {
         this.fsText.text = `Free Spins Left: ${count}`;
+    }
+
+    setInteractive(interactive) {
+        const buttons = [
+            this.spinButton,
+            this.increaseBetButton,
+            this.decreaseBetButton,
+            this.anteButton,
+            this.buyButton,
+            this.autoplayButton,
+        ];
+
+        for (const button of buttons) {
+            if (button) {
+                button.interactive = interactive;
+                button.alpha = interactive ? 1.0 : 0.5;
+            }
+        }
+    }
+
+    showAutoplayPopup(startCallback) {
+        if (this.autoplayPopup) {
+            this.autoplayPopup.destroy();
+        }
+    
+        const popup = new PIXI.Container();
+        this.autoplayPopup = popup;
+        popup.x = this.app.screen.width / 2;
+        popup.y = this.app.screen.height / 2;
+    
+        const background = new PIXI.Graphics();
+        background.beginFill(0x000000, 0.8);
+        background.drawRect(-300, -200, 600, 400);
+        background.endFill();
+        popup.addChild(background);
+    
+        const title = new PIXI.Text('Select Autoplay Spins', { ...this.textStyle, fontSize: 30 });
+        title.anchor.set(0.5);
+        title.y = -160;
+        popup.addChild(title);
+    
+        const spinCounts = [10, 20, 25, 50, 100, 500, 1000];
+        const buttonContainer = new PIXI.Container();
+        popup.addChild(buttonContainer);
+    
+        const buttonWidth = 120;
+        const buttonHeight = 50;
+        const gap = 20;
+        const columns = 3;
+    
+        spinCounts.forEach((count, index) => {
+            const button = new PIXI.Graphics();
+            button.beginFill(0x333333);
+            button.drawRoundedRect(0, 0, buttonWidth, buttonHeight, 10);
+            button.endFill();
+            button.interactive = true;
+            button.buttonMode = true;
+    
+            const text = new PIXI.Text(count, { ...this.textStyle, fontSize: 24, fill: '#FFFFFF' });
+            text.anchor.set(0.5);
+            text.x = buttonWidth / 2;
+            text.y = buttonHeight / 2;
+            button.addChild(text);
+    
+            const col = index % columns;
+            const row = Math.floor(index / columns);
+    
+            button.x = col * (buttonWidth + gap);
+            button.y = row * (buttonHeight + gap);
+    
+            button.on('pointerdown', () => {
+                startCallback(count);
+                if (this.autoplayPopup) {
+                    this.autoplayPopup.destroy();
+                    this.autoplayPopup = null;
+                }
+            });
+            
+            buttonContainer.addChild(button);
+        });
+    
+        buttonContainer.x = -buttonContainer.width / 2;
+        buttonContainer.y = -buttonContainer.height / 2 + 20;
+    
+        const closeButton = new PIXI.Text('X', { ...this.textStyle, fontSize: 24, fill: '#FF0000' });
+        closeButton.anchor.set(0.5);
+        closeButton.x = 280;
+        closeButton.y = -180;
+        closeButton.interactive = true;
+        closeButton.buttonMode = true;
+        closeButton.on('pointerdown', () => {
+            if (this.autoplayPopup) {
+                this.autoplayPopup.destroy();
+                this.autoplayPopup = null;
+            }
+        });
+        popup.addChild(closeButton);
+    
+        this.container.addChild(popup);
+    }
+
+    updateTumbleWin(value) {
+        this.tumbleWinText.text = `Tumble Win: ${value.toFixed(2)}`;
+    }
+
+    showTumbleWin() {
+        this.tumbleWinText.visible = true;
+    }
+
+    hideTumbleWin() {
+        this.tumbleWinText.visible = false;
     }
 }

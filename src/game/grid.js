@@ -47,6 +47,13 @@ export class Grid {
         this.reelsContainer.x = (this.app.screen.width - this.reelsContainer.width) / 2;
         this.reelsContainer.y = (this.app.screen.height - this.reelsContainer.height) / 2 - 50; // Смещаем вверх
         
+        const mask = new PIXI.Graphics();
+        mask.beginFill(0xFFFFFF);
+        mask.drawRect(this.reelsContainer.x, this.reelsContainer.y, this.reelsContainer.width, this.reelsContainer.height);
+        mask.endFill();
+        this.reelsContainer.mask = mask;
+        this.app.stage.addChild(mask);
+
         this.app.stage.addChild(this.reelsContainer);
         console.log("Сетка символов успешно создана!");
     }
@@ -62,7 +69,7 @@ export class Grid {
         const cellContainer = new PIXI.Container();
         let symbolSprite;
 
-        const frame = PIXI.Sprite.from('symbol_grid_frame');
+                const frame = PIXI.Sprite.from('symbol_grid_frame_white');
         frame.width = SYMBOL_SIZE;
         frame.height = SYMBOL_SIZE;
         frame.anchor.set(0.5);

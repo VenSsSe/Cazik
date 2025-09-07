@@ -6,6 +6,8 @@ import { checkForWins, calculatePayout } from './game/gameLogic.js';
 export async function startSpin(isFirstFreeSpin = false) {
     if (this.isSpinning && !isFirstFreeSpin) return;
     this.isSpinning = true;
+    this.ui.setInteractive(false);
+    this.ui.hideTumbleWin();
 
     if (this.audioManager) this.audioManager.play('spin_sound');
 
@@ -19,6 +21,7 @@ export async function startSpin(isFirstFreeSpin = false) {
             this.ui.setAutoplayState(false);
             console.log("Недостаточно средств.");
             this.isSpinning = false;
+            this.ui.setInteractive(true);
             return;
         }
         this.playerBalance -= spinCost;
@@ -28,6 +31,7 @@ export async function startSpin(isFirstFreeSpin = false) {
     this.ui.updateWin(0);
 
     let currentSpinTotalWin = 0;
+    let tumbleWin = 0;
     await this.grid.spin();
 
     while (true) {
@@ -49,7 +53,12 @@ export async function startSpin(isFirstFreeSpin = false) {
         if (wins.length === 0) break;
         
         const payout = calculatePayout(wins, this.currentBet, this.symbols);
-        if (payout > 0 && this.audioManager) this.audioManager.play('win_sound');
+        if (payout > 0) {
+            if (this.audioManager) this.audioManager.play('win_sound');
+            tumbleWin += payout;
+            this.ui.updateTumbleWin(tumbleWin);
+            this.ui.showTumbleWin();
+        }
         currentSpinTotalWin += payout;
         
         const spritesToRemove = [];
@@ -100,6 +109,7 @@ export async function startSpin(isFirstFreeSpin = false) {
     }
     
     this.isSpinning = false;
+    this.ui.setInteractive(true);
 
     if (this.autoplayManager.isActive) {
         this.autoplayManager.continue();
@@ -169,8 +179,10 @@ export function handleAutoplay() {
         this.autoplayManager.stop();
         this.ui.setAutoplayState(false);
     } else {
-        this.autoplayManager.start(10);
-        this.ui.setAutoplayState(true);
+        this.ui.showAutoplayPopup((count) => {
+            this.autoplayManager.start(count);
+            this.ui.setAutoplayState(true);
+        });
     }
 }
 

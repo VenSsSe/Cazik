@@ -1,7 +1,7 @@
 // src/game/grid-animations.js
 
 /**
- * Удаляет выигрышные символы с поля с анимацией взрыва.
+ * Анимация и удаление выигрышных символов.
  * @param {Array<PIXI.Container>} symbolsToRemove - Список контейнеров для удаления.
  * @returns {Promise<void>}
  */
@@ -10,37 +10,95 @@ export async function removeSymbols(symbolsToRemove) {
         return;
     }
 
-    const explosionFrames = [];
-    for (let i = 0; i < 15; i++) {
-        const texture = PIXI.Assets.get(`vfx_symbol_explode_${i}`);
-        if (texture) explosionFrames.push(texture);
-    }
-
     const animationPromises = symbolsToRemove.map(cellContainer => {
         return new Promise(resolve => {
-            const { col, row } = cellContainer.gridPosition;
-            this.gridData[col][row] = null;
-            this.gridSprites[col][row] = null;
+            const symbolSprite = cellContainer.symbolSprite;
+            const frameSprite = cellContainer.children[0];
+            const originalScaleX = cellContainer.scale.x;
+            const originalScaleY = cellContainer.scale.y;
 
-            const explosion = new PIXI.AnimatedSprite(explosionFrames);
-            explosion.anchor.set(0.5);
-            explosion.scale.set(this.SYMBOL_SIZE / 192);
-            explosion.x = cellContainer.x;
-            explosion.y = cellContainer.y;
-            explosion.loop = false;
-            explosion.animationSpeed = 0.3;
-            
-            cellContainer.parent.addChild(explosion);
-            cellContainer.destroy();
+            const scaleTo = (target, toX, toY, duration, onComplete) => {
+                const startX = target.scale.x;
+                const startY = target.scale.y;
+                const changeX = toX - startX;
+                const changeY = toY - startY;
+                const startTime = performance.now();
 
-            explosion.onComplete = () => {
-                explosion.destroy();
-                resolve();
+                function animate(currentTime) {
+                    const elapsedTime = currentTime - startTime;
+                    const progress = Math.min(elapsedTime / duration, 1);
+                    target.scale.x = startX + changeX * progress;
+                    target.scale.y = startY + changeY * progress;
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        if (onComplete) onComplete();
+                    }
+                }
+                requestAnimationFrame(animate);
             };
-            explosion.play();
+
+            const fadeOut = (target, duration, onComplete) => {
+                const startAlpha = target.alpha;
+                const change = 0 - startAlpha;
+                const startTime = performance.now();
+
+                function animate(currentTime) {
+                    const elapsedTime = currentTime - startTime;
+                    const progress = Math.min(elapsedTime / duration, 1);
+                    target.alpha = startAlpha + change * progress;
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        if (onComplete) onComplete();
+                    }
+                }
+                requestAnimationFrame(animate);
+            };
+
+            // Step 1: Scale Up
+            scaleTo(cellContainer, originalScaleX * 1.1, originalScaleY * 1.1, 200, () => {
+                // Step 2: Flip (Phase 1)
+                scaleTo(cellContainer, 0, originalScaleY * 1.1, 150, () => {
+                    // Step 3: Transformation
+                    const symbolData = this.gridData[cellContainer.gridPosition.col][cellContainer.gridPosition.row];
+                    if (symbolData && symbolData.id) {
+                        const animatedTextureId = `${symbolData.id}_animated`;
+                        try {
+                            const animatedTexture = PIXI.Assets.get(animatedTextureId);
+                            if (animatedTexture) {
+                                symbolSprite.texture = animatedTexture;
+                            }
+                        } catch (err) {
+                            console.warn(`Could not find animated texture: ${animatedTextureId}`);
+                        }
+                    }
+                    try {
+                        frameSprite.texture = PIXI.Assets.get('symbol_grid_frame_black');
+                    } catch(err) {
+                        console.warn(`Could not find texture: symbol_grid_frame_black`);
+                    }
+
+
+                    // Step 4: Flip (Phase 2)
+                    scaleTo(cellContainer, originalScaleX * 1.1, originalScaleY * 1.1, 150, () => {
+                        // Step 5: Pause
+                        setTimeout(() => {
+                            // Step 6: Fade Out
+                            fadeOut(cellContainer, 300, () => {
+                                const { col, row } = cellContainer.gridPosition;
+                                this.gridData[col][row] = null;
+                                this.gridSprites[col][row] = null;
+                                cellContainer.destroy();
+                                resolve();
+                            });
+                        }, 500); // 0.5s pause
+                    });
+                });
+            });
         });
     });
-    
+
     await Promise.all(animationPromises);
 }
 

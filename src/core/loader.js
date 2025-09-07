@@ -19,7 +19,8 @@ export async function loadAssets() {
         { alias: 'background_olympus', src: 'assets/images/backgrounds/background_olympus.jpg' },
         { alias: 'reels_background', src: 'assets/images/backgrounds/reels_background.png' },
         { alias: 'game_board_frame', src: 'assets/ui/frames/game_board_frame.png' },
-        { alias: 'symbol_grid_frame', src: 'assets/ui/frames/symbol_grid_frame.png' },
+                { alias: 'symbol_grid_frame_white', src: 'assets/ui/frames/symbol_grid_frame_white.png' },
+        { alias: 'symbol_grid_frame_black', src: 'assets/ui/frames/symbol_grid_frame _ black.png' },,
         { alias: 'logo', src: 'assets/ui/logo/logo.png' },
 
         // Кнопки и попапы
