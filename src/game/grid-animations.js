@@ -63,7 +63,7 @@ export async function removeSymbols(symbolsToRemove) {
                     // Step 3: Transformation
                     const symbolData = this.gridData[cellContainer.gridPosition.col][cellContainer.gridPosition.row];
                     if (symbolData && symbolData.id) {
-                        const animatedTextureId = `${symbolData.id}_animated`;
+                        const animatedTextureId = `${symbolData.id}-animated`;
                         try {
                             const animatedTexture = PIXI.Assets.get(animatedTextureId);
                             if (animatedTexture) {

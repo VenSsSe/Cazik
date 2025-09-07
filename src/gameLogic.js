@@ -10,7 +10,7 @@ export function checkForWins(gridSymbolIds) {
             const symbolId = gridSymbolIds[i][j];
             if (!symbolId) continue;
 
-            if (symbolId === 'scatter') {
+            if (symbolId === 'symbol_scatter_cat') {
                 scatterCount++;
             } else if (symbolId !== 'multiplier') {
                 symbolCounts[symbolId] = (symbolCounts[symbolId] || 0) + 1;

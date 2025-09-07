@@ -40,7 +40,7 @@ export async function loadAssets() {
         imagePaths.push({ alias: symbol.id, src: symbol.path });
         // Если есть анимированная, тоже загружаем
         if (symbol.path_animated) {
-            imagePaths.push({ alias: `${symbol.id}_animated`, src: symbol.path_animated });
+            imagePaths.push({ alias: `${symbol.id}-animated`, src: symbol.path_animated });
         }
     });
 

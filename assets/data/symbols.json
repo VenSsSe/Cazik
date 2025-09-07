@@ -62,9 +62,10 @@
     "weight": 100,
     "payouts": { "8-9": 0.25, "10-11": 0.75, "12-30": 2 }
   },
-  {
-    "id": "scatter",
-    "path": "assets/symbols/symbol_scatter_zeus.png",
+    {
+    "id": "symbol_scatter_cat",
+    "path": "assets/symbols/scatter_cat/symbol_scatter_cat.png",
+    "path_animated": "assets/symbols/scatter_cat/symbol_scatter_cat_animated.png",
     "weight": 8,
     "payouts": { "4": 3, "5": 5, "6": 100 }
   },
