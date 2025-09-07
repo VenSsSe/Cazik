@@ -1,4 +1,5 @@
 import { checkForWins, calculatePayout } from './game/gameLogic.js';
+import { showCongratsPopup } from './core/ui/popups.js';
 
 // NOTE: All functions in this file are intended to be bound to a context object in app.js.
 // This gives them access to the application state (app, grid, ui, playerBalance, etc.) via `this`.
@@ -42,7 +43,7 @@ export async function startSpin(isFirstFreeSpin = false) {
             this.freeSpinsManager.start(this.config.freeSpins.initialSpins);
             this.character.setPowerState(true);
             if(this.autoplayManager.isActive) this.autoplayManager.stop();
-            showCongratsPopup.call(this);
+            showCongratsPopup(this, startSpin.bind(this));
             return; 
         } 
         if (scatterCount >= this.config.freeSpins.retriggerCount && this.freeSpinsManager.isActive) {
@@ -118,37 +119,6 @@ export async function startSpin(isFirstFreeSpin = false) {
     }
 }
 
-export function showCongratsPopup(isBought = false) {
-    const popup = PIXI.Sprite.from('ui_popup_congrats');
-    popup.anchor.set(0.5);
-    popup.x = this.app.screen.width / 2;
-    popup.y = this.app.screen.height / 2;
-    popup.scale.set(1.5);
-    popup.eventMode = 'static';
-    popup.cursor = 'pointer';
-
-    const textStyle = new PIXI.TextStyle({ 
-        fontFamily: 'Arial Black', 
-        fontSize: 80, 
-        fill: '#FFD700', 
-        fontWeight: 'bold', 
-        stroke: '#4a2500', 
-        strokeThickness: 8 
-    });
-    const spinsText = new PIXI.Text(`${this.freeSpinsManager.spinsLeft} FREE SPINS`, textStyle);
-    spinsText.anchor.set(0.5);
-    spinsText.y = 50;
-    popup.addChild(spinsText);
-
-    popup.on('pointerdown', () => {
-        popup.destroy();
-        this.ui.showFreeSpins(this.freeSpinsManager.spinsLeft);
-        startSpin.call(this, true);
-    });
-
-    this.app.stage.addChild(popup);
-}
-
 export function handleAnteToggle() {
     if (this.isSpinning || this.autoplayManager.isActive) return;
     this.bonusManager.toggleAnteBet();
@@ -166,7 +136,7 @@ export function handleBuyBonus() {
         if (this.audioManager) this.audioManager.play('buy_bonus_sound');
         this.freeSpinsManager.start(this.config.freeSpins.initialSpins);
         this.character.setPowerState(true);
-        showCongratsPopup.call(this, true);
+        showCongratsPopup(this, startSpin.bind(this, true));
     } else {
         console.log("Недостаточно средств для покупки бонуса.");
     }
