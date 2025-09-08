@@ -3,7 +3,7 @@ export function createPanels(context) {
     context.fsContainer = new PIXI.Container();
     context.fsContainer.visible = false;
     const fsTextStyle = new PIXI.TextStyle({ 
-        fontFamily: 'Arial',
+        fontFamily: 'Cyberpunk',
         fontSize: 48,
         fontWeight: 'bold',
         fill: '#FFD700',

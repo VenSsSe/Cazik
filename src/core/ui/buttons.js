@@ -20,13 +20,14 @@ export function createButtons(context) {
     const yPos = context.app.screen.height - 100;
 
     // Left side buttons
-    context.infoButton = createButton(context, 'ui_button_info', 80, yPos, context.settingsCallback, 0.4);
+    context.infoButton = createButton(context, 'ui_button_info', 100, context.app.screen.height / 2 - 100, context.settingsCallback, 0.5);
     
-    // These buttons seem to be part of a different panel (left side panel)
-    context.buyButton = createButton(context, 'ui_button_buyfeature', 180, context.app.screen.height - 250, context.buyCallback, 0.5);
-    context.anteButton = createButton(context, 'ui_button_ante', 180, context.app.screen.height - 120, context.anteCallback, 0.5);
+    context.buyButton = createButton(context, 'ui_button_buyfeature', 100, context.app.screen.height / 2, context.buyCallback, 0.5);
+    context.anteButton = createButton(context, 'ui_button_ante', 100, context.app.screen.height / 2 + 100, context.anteCallback, 0.5);
 
     // Center buttons
     context.spinButton = createButton(context, 'ui_button_spin', context.app.screen.width / 2, yPos, context.spinCallback, 0.7);
+    context.spinButton.tint = 0xFFD700; // Golden tint
     context.autoplayButton = createButton(context, 'ui_button_autoplay', context.app.screen.width / 2 + 180, yPos, context.autoplayCallback, 0.5);
+    context.autoplayButton.tint = 0xFFD700; // Golden tint
 }

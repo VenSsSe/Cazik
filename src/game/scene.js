@@ -21,6 +21,15 @@ export function createScene(app) {
     reelsBackground.height = 750; // 5 рядов * 150px
     app.stage.addChild(reelsBackground);
 
+    // Левая боковая панель
+    const leftPanel = PIXI.Sprite.from('ui_panel_top_win');
+    leftPanel.anchor.set(0.5);
+    leftPanel.x = 100; // Примерное положение слева
+    leftPanel.y = app.screen.height / 2;
+    leftPanel.rotation = Math.PI / 2; // Поворот на 90 градусов (PI/2 радианов)
+    leftPanel.scale.set(1.2); // Возможно, потребуется настроить масштаб
+    app.stage.addChild(leftPanel);
+
     // Новая нижняя панель UI
     const bottomPanel = PIXI.Sprite.from('ui_panel_bottom_main');
     bottomPanel.anchor.set(0.5, 1);

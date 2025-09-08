@@ -69,10 +69,11 @@ export class Grid {
         const cellContainer = new PIXI.Container();
         let symbolSprite;
 
-                const frame = PIXI.Sprite.from('symbol_grid_frame_white');
+                const frame = PIXI.Sprite.from('symbol_grid_frame');
         frame.width = SYMBOL_SIZE;
         frame.height = SYMBOL_SIZE;
         frame.anchor.set(0.5);
+        frame.alpha = 0.6; // Make it semi-transparent
         cellContainer.addChild(frame);
 
         if (symbolData.type === 'multiplier') {
