@@ -19,7 +19,7 @@ export function createPanels(context) {
 
     // Tumble Win Display
     const tumbleWinStyle = new PIXI.TextStyle({
-        fontFamily: 'Arial Black',
+        fontFamily: 'Cyberpunk',
         fontSize: 36,
         fill: '#ffffff',
         stroke: '#000000',
@@ -28,7 +28,7 @@ export function createPanels(context) {
     context.tumbleWinText = new PIXI.Text('', tumbleWinStyle);
     context.tumbleWinText.anchor.set(0.5);
     context.tumbleWinText.x = context.app.screen.width / 2;
-    context.tumbleWinText.y = context.app.screen.height / 2 - 450;
+    context.tumbleWinText.y = 100;
     context.tumbleWinText.visible = false;
     context.container.addChild(context.tumbleWinText);
 }

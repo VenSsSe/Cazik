@@ -1,0 +1,129 @@
+﻿`-- audio
+`-- characters
+`-- data
+`-- effects
+`-- images
+`-- symbols
+`-- ui
+    tree.bat
+    tree.txt
+    win.mp3
+        spin.mp3
+    `-- char_cat_base
+    `-- char_cat_power
+            tile000.png
+            tile001.png
+            tile002.png
+            tile003.png
+            tile004.png
+            tile005.png
+            tile006.png
+            tile007.png
+            tile008.png
+            tile009.png
+            tile010.png
+            tile011.png
+            tile000.png
+            tile001.png
+            tile002.png
+            tile003.png
+            tile004.png
+            tile005.png
+            tile006.png
+            tile007.png
+            tile008.png
+            tile009.png
+            tile010.png
+            tile011.png
+        config.json
+        symbols.json
+    `-- vfx_multiplier_orb
+    `-- vfx_symbol_explode
+            tile000.png
+            tile001.png
+            tile002.png
+            tile003.png
+            tile004.png
+            tile005.png
+            tile006.png
+            tile007.png
+            tile008.png
+            tile009.png
+            tile010.png
+            tile011.png
+            tile012.png
+            tile013.png
+            tile014.png
+            tile015.png
+            tile016.png
+            tile017.png
+            tile018.png
+            tile019.png
+            tile000.png
+            tile001.png
+            tile002.png
+            tile003.png
+            tile004.png
+            tile005.png
+            tile006.png
+            tile007.png
+            tile008.png
+            tile009.png
+            tile010.png
+            tile011.png
+            tile012.png
+            tile013.png
+            tile014.png
+    `-- backgrounds
+            background_olympus.jpg
+            reels_background.png
+    `-- Alchemist_Skeleton
+    `-- Alchemist_Snake
+    `-- Chef_Pig
+    `-- Hellhound
+    `-- Magma_Golem
+    `-- Monk_Panda
+    `-- Samurai_Rat
+    `-- scatter_cat
+    `-- Warrior_Wolf
+    `-- Wizard_Mouse
+            Alchemist_Skeleton-animated.png
+            Alchemist_Skeleton.png
+            Alchemist_Snake-animated.png
+            Alchemist_Snake.png
+            Chef_Pig-animated.png
+            Chef_Pig.png
+            Hellhound-animated.png
+            Hellhound.png
+            Magma_Golem-animated.png
+            Magma_Golem.png
+            Monk_Panda-animated.png
+            Monk_Panda.png
+            Samurai_Rat-animated.png
+            Samurai_Rat.png
+            symbol_scatter_cat.png
+            symbol_scatter_cat_animated.png
+            Warrior_Wolf-animated.png
+            Warrior_Wolf.png
+            Wizard_Mouse-animated.png
+            Wizard_Mouse.png
+    `-- buttons
+    `-- frames
+    `-- logo
+    `-- panels
+    `-- popups
+            about.png
+            minus.png
+            next.png
+            plus.png
+            restart.png
+            shop.png
+            upgrade.png
+            game_board_frame.jpg
+            game_board_frame.png
+            symbol_grid_frame _ black.png
+            symbol_grid_frame.png
+            symbol_grid_frame_white.png
+            logo.png
+            ui_panel_bottom.png
+            table.png

@@ -21,20 +21,26 @@ export function createScene(app) {
     reelsBackground.height = 750; // 5 рядов * 150px
     app.stage.addChild(reelsBackground);
 
-    // Рамка игрового поля (внешняя)
-    const gameFrame = PIXI.Sprite.from('game_board_frame');
-    gameFrame.anchor.set(0.5);
-    gameFrame.x = app.screen.width / 2;
-    gameFrame.y = app.screen.height / 2 - 50; // Смещаем туда же, куда и фон барабанов
-        gameFrame.width = reelsBackground.width;
-    gameFrame.height = reelsBackground.height;
-        app.stage.addChild(gameFrame);
-
-    // Bottom Panel
-    const bottomPanel = PIXI.Sprite.from('ui_panel_bottom');
+    // Новая нижняя панель UI
+    const bottomPanel = PIXI.Sprite.from('ui_panel_bottom_main');
     bottomPanel.anchor.set(0.5, 1);
     bottomPanel.x = app.screen.width / 2;
     bottomPanel.y = app.screen.height;
     bottomPanel.width = app.screen.width;
     app.stage.addChild(bottomPanel);
+
+    // Верхняя панель для выигрыша
+    const topWinPanel = PIXI.Sprite.from('ui_panel_top_win');
+    topWinPanel.anchor.set(0.5);
+    topWinPanel.x = app.screen.width / 2;
+    topWinPanel.y = 100; // Примерное положение над сеткой
+    app.stage.addChild(topWinPanel);
+
+    // Логотип
+    const logo = PIXI.Sprite.from('logo_main');
+    logo.anchor.set(0.5);
+    logo.x = app.screen.width / 2 + reelsBackground.width / 2 + 150; // Справа от сетки
+    logo.y = app.screen.height / 2;
+    logo.scale.set(0.8); // Примерный масштаб
+    app.stage.addChild(logo);
 }

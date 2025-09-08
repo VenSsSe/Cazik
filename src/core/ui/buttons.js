@@ -17,7 +17,7 @@ function createButton(context, texture, x, y, callback, scale = 0.8) {
 }
 
 export function createButtons(context) {
-    const yPos = context.app.screen.height - 90;
+    const yPos = context.app.screen.height - 100;
 
     // Left side buttons
     context.infoButton = createButton(context, 'ui_button_info', 80, yPos, context.settingsCallback, 0.4);

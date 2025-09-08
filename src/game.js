@@ -184,20 +184,26 @@ export function setBet(value) {
 
 export function handleSettingsClick() {
     const onSoundToggle = () => {
-        // TODO: Implement sound toggle logic
-        console.log('Sound toggled');
-        return true; // placeholder
+        if (this.audioManager) {
+            this.audioManager.toggleMute();
+            return !this.audioManager.isMuted;
+        }
+        return false; // Default to off if no audio manager
     };
 
     const onSpeedToggle = () => {
-        // TODO: Implement speed toggle logic
-        console.log('Speed toggled');
-        return 'NORMAL'; // placeholder
+        if (this.speedManager) {
+            this.speedManager.cycleSpeed();
+            return this.speedManager.currentSpeedMode;
+        }
+        return 'NORMAL'; // Default if no speed manager
     };
 
     const onPayoutTable = () => {
-        // TODO: Implement payout table logic
+        // TODO: Implement actual payout table display
         console.log('Payout table opened');
+        // For now, we can show a simple alert or a placeholder popup
+        // this.ui.showPayoutTablePopup(); // Assuming such a method exists
     };
 
     this.ui.showSettingsPopup({ onSoundToggle, onSpeedToggle, onPayoutTable });

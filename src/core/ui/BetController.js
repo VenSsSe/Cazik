@@ -7,11 +7,11 @@ export class BetController {
 
         this.container = new PIXI.Container();
         this.container.x = app.screen.width / 2 - 350;
-        this.container.y = app.screen.height - 90;
+        this.container.y = app.screen.height - 100;
         app.stage.addChild(this.container);
 
         this.textStyle = new PIXI.TextStyle({
-            fontFamily: 'Arial Black',
+            fontFamily: 'Cyberpunk',
             fontSize: 42,
             fontWeight: '900',
             fill: '#f7d9a3',
@@ -62,30 +62,30 @@ export class BetController {
         popup.y = this.app.screen.height / 2;
         this.app.stage.addChild(popup);
 
-        const background = new PIXI.Graphics();
-        background.beginFill(0x000000, 0.8);
-        background.drawRect(-300, -200, 600, 400);
-        background.endFill();
+        // Используем новый спрайт для фона
+        const background = PIXI.Sprite.from('bet_popup_background');
+        background.anchor.set(0.5);
         popup.addChild(background);
 
-        const title = new PIXI.Text('Select Bet', { ...this.textStyle, fontSize: 30 });
+        const title = new PIXI.Text('Select Bet', { ...this.textStyle, fontSize: 40, fill: '#FFFFFF' });
         title.anchor.set(0.5);
-        title.y = -160;
+        title.y = -background.height / 2 + 50; // Располагаем заголовок вверху попапа
         popup.addChild(title);
 
-        const betValues = [0.2, 0.5, 1, 2, 5, 10, 20, 50]; // Example bet values
+        const betValues = [0.2, 0.5, 1, 2, 5, 10, 20, 50];
         const buttonContainer = new PIXI.Container();
         popup.addChild(buttonContainer);
 
         betValues.forEach((value, index) => {
+            // Для кнопок можно оставить Graphics или тоже заменить на спрайты, если они есть
             const button = new PIXI.Graphics();
-            button.beginFill(0x333333);
-            button.drawRoundedRect(0, 0, 120, 50, 10);
+            button.beginFill(0x333333, 0.7);
+            button.drawRoundedRect(0, 0, 120, 50, 15);
             button.endFill();
             button.interactive = true;
             button.buttonMode = true;
 
-            const text = new PIXI.Text(value.toFixed(2), { ...this.textStyle, fontSize: 24, fill: '#FFFFFF' });
+            const text = new PIXI.Text(value.toFixed(2), { ...this.textStyle, fontSize: 28, fill: '#FFFFFF' });
             text.anchor.set(0.5);
             text.x = 60;
             text.y = 25;
@@ -105,13 +105,14 @@ export class BetController {
             buttonContainer.addChild(button);
         });
 
+        // Центрируем контейнер с кнопками внутри попапа
         buttonContainer.x = -buttonContainer.width / 2;
-        buttonContainer.y = -buttonContainer.height / 2;
+        buttonContainer.y = -buttonContainer.height / 2 + 20;
 
-        const closeButton = new PIXI.Text('X', { ...this.textStyle, fontSize: 24, fill: '#FF0000' });
+        const closeButton = new PIXI.Text('X', { ...this.textStyle, fontSize: 30, fill: '#FF0000' });
         closeButton.anchor.set(0.5);
-        closeButton.x = 280;
-        closeButton.y = -180;
+        closeButton.x = background.width / 2 - 30;
+        closeButton.y = -background.height / 2 + 30;
         closeButton.interactive = true;
         closeButton.buttonMode = true;
         closeButton.on('pointerdown', () => {

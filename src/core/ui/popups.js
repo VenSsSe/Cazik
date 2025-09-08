@@ -11,103 +11,93 @@ export function showAutoplayPopup(context, startCallback) {
     context.autoplayPopup = popup;
     popup.x = context.app.screen.width / 2;
     popup.y = context.app.screen.height / 2;
+    context.app.stage.addChild(popup);
 
-    const background = new PIXI.Graphics();
-    background.beginFill(0x000000, 0.8);
-    background.drawRect(-300, -200, 600, 400);
-    background.endFill();
+    const background = PIXI.Sprite.from('popup_background_large');
+    background.anchor.set(0.5);
     popup.addChild(background);
 
-    const title = new PIXI.Text('Select Autoplay Spins', { ...context.textStyle, fontSize: 30 });
+    const title = new PIXI.Text('АВТОИГРА', { ...context.textStyle, fontSize: 40, fill: '#FFFFFF' });
     title.anchor.set(0.5);
-    title.y = -160;
+    title.y = -background.height / 2 + 60;
     popup.addChild(title);
 
-    const spinCounts = [10, 20, 25, 50, 100, 500, 1000];
+    const spinCounts = [10, 20, 25, 50, 100];
     const buttonContainer = new PIXI.Container();
     popup.addChild(buttonContainer);
 
-    const buttonWidth = 120;
-    const buttonHeight = 50;
-    const gap = 20;
-    const columns = 3;
-
     spinCounts.forEach((count, index) => {
-        const button = new PIXI.Graphics();
-        button.beginFill(0x333333);
-        button.drawRoundedRect(0, 0, buttonWidth, buttonHeight, 10);
-        button.endFill();
+        const button = new PIXI.Graphics().beginFill(0x333333, 0.8).drawRoundedRect(0, 0, 100, 50, 15).endFill();
         button.interactive = true;
         button.buttonMode = true;
-
-        const text = new PIXI.Text(count, { ...context.textStyle, fontSize: 24, fill: '#FFFFFF' });
+        const text = new PIXI.Text(count, { ...context.textStyle, fontSize: 28, fill: '#FFFFFF' });
         text.anchor.set(0.5);
-        text.x = buttonWidth / 2;
-        text.y = buttonHeight / 2;
+        text.x = 50;
+        text.y = 25;
         button.addChild(text);
-
-        const col = index % columns;
-        const row = Math.floor(index / columns);
-
-        button.x = col * (buttonWidth + gap);
-        button.y = row * (buttonHeight + gap);
-
+        const col = index % 5;
+        button.x = col * 120;
         button.on('pointerdown', () => {
             context.speedManager.setSpeed(selectedSpeed);
             startCallback(count);
-            if (context.autoplayPopup) {
-                context.autoplayPopup.destroy();
-                context.autoplayPopup = null;
-            }
+            if (context.autoplayPopup) { context.autoplayPopup.destroy(); context.autoplayPopup = null; }
         });
-        
         buttonContainer.addChild(button);
     });
 
     buttonContainer.x = -buttonContainer.width / 2;
-    buttonContainer.y = -buttonContainer.height / 2 + 20;
+    buttonContainer.y = -100;
 
-    const turboButton = new PIXI.Text('Turbo', { ...context.textStyle, fontSize: 24, fill: '#FFFFFF' });
-    turboButton.y = 100;
-    turboButton.x = -100;
-    turboButton.anchor.set(0.5);
-    turboButton.eventMode = 'static';
-    turboButton.cursor = 'pointer';
-    turboButton.on('pointerdown', () => {
-        selectedSpeed = SpeedModes.TURBO;
-        turboButton.style.fill = '#00FF00';
-        quickButton.style.fill = '#FFFFFF';
-    });
-    popup.addChild(turboButton);
+    // --- Checkboxes ---
+    const checkboxContainer = new PIXI.Container();
+    checkboxContainer.y = 50;
+    popup.addChild(checkboxContainer);
 
-    const quickButton = new PIXI.Text('Quick', { ...context.textStyle, fontSize: 24, fill: '#FFFFFF' });
-    quickButton.y = 100;
-    quickButton.x = 100;
-    quickButton.anchor.set(0.5);
-    quickButton.eventMode = 'static';
-    quickButton.cursor = 'pointer';
-    quickButton.on('pointerdown', () => {
-        selectedSpeed = SpeedModes.QUICK;
-        quickButton.style.fill = '#00FF00';
-        turboButton.style.fill = '#FFFFFF';
-    });
-    popup.addChild(quickButton);
+    const turboCheckboxSprite = PIXI.Sprite.from('ui_checkbox_unchecked');
+    const quickCheckboxSprite = PIXI.Sprite.from('ui_checkbox_unchecked');
 
-    const closeButton = new PIXI.Text('X', { ...context.textStyle, fontSize: 24, fill: '#FF0000' });
+    const setupCheckbox = (sprite, labelText, xPos, speedMode) => {
+        const container = new PIXI.Container();
+        container.x = xPos;
+        sprite.scale.set(0.6);
+        sprite.anchor.set(0.5);
+        const label = new PIXI.Text(labelText, { ...context.textStyle, fontSize: 28, fill: '#FFFFFF' });
+        label.anchor.set(0, 0.5);
+        label.x = 30;
+        container.addChild(sprite, label);
+        container.eventMode = 'static';
+        container.cursor = 'pointer';
+        container.on('pointerdown', () => {
+            if (selectedSpeed === speedMode) {
+                selectedSpeed = SpeedModes.NORMAL;
+                sprite.texture = PIXI.Assets.get('ui_checkbox_unchecked');
+            } else {
+                selectedSpeed = speedMode;
+                turboCheckboxSprite.texture = PIXI.Assets.get('ui_checkbox_unchecked');
+                quickCheckboxSprite.texture = PIXI.Assets.get('ui_checkbox_unchecked');
+                sprite.texture = PIXI.Assets.get('ui_checkbox_checked');
+            }
+        });
+        return container;
+    };
+
+    const turboCheckbox = setupCheckbox(turboCheckboxSprite, 'Турбо-спин', -200, SpeedModes.TURBO);
+    const quickCheckbox = setupCheckbox(quickCheckboxSprite, 'Быстрая игра', 100, SpeedModes.QUICK);
+    
+    checkboxContainer.addChild(turboCheckbox, quickCheckbox);
+    checkboxContainer.x = -checkboxContainer.width / 2 + 100;
+
+
+    const closeButton = new PIXI.Text('X', { ...context.textStyle, fontSize: 30, fill: '#FF0000' });
     closeButton.anchor.set(0.5);
-    closeButton.x = 280;
-    closeButton.y = -180;
+    closeButton.x = background.width / 2 - 40;
+    closeButton.y = -background.height / 2 + 40;
     closeButton.interactive = true;
     closeButton.buttonMode = true;
     closeButton.on('pointerdown', () => {
-        if (context.autoplayPopup) {
-            context.autoplayPopup.destroy();
-            context.autoplayPopup = null;
-        }
+        if (context.autoplayPopup) { context.autoplayPopup.destroy(); context.autoplayPopup = null; }
     });
     popup.addChild(closeButton);
-
-    context.container.addChild(popup);
 }
 
 export function showCongratsPopup(context, startSpinCallback) {
@@ -120,7 +110,7 @@ export function showCongratsPopup(context, startSpinCallback) {
     popup.cursor = 'pointer';
 
     const textStyle = new PIXI.TextStyle({ 
-        fontFamily: 'Arial Black', 
+        fontFamily: 'Cyberpunk', 
         fontSize: 80, 
         fill: '#FFD700', 
         fontWeight: 'bold', 
@@ -152,55 +142,58 @@ export function showSettingsPopup(context, { onSoundToggle, onSpeedToggle, onPay
     popup.y = context.app.screen.height / 2;
     context.app.stage.addChild(popup);
 
-    const background = new PIXI.Graphics();
-    background.beginFill(0x000000, 0.9);
-    background.drawRect(-350, -250, 700, 500);
-    background.endFill();
+    const background = PIXI.Sprite.from('popup_background_large');
+    background.anchor.set(0.5);
     popup.addChild(background);
 
-    const title = new PIXI.Text('Settings', { ...context.textStyle, fontSize: 40 });
+    const title = new PIXI.Text('НАСТРОЙКИ', { ...context.textStyle, fontSize: 40, fill: '#FFFFFF' });
     title.anchor.set(0.5);
-    title.y = -200;
+    title.y = -background.height / 2 + 60;
     popup.addChild(title);
 
     // Sound Toggle
-    const soundButton = new PIXI.Text('Sound: ON', { ...context.textStyle, fontSize: 32 });
+    const soundButton = new PIXI.Text('ЗВУК: ВКЛ', { ...context.textStyle, fontSize: 32, fill: '#FFFFFF' });
     soundButton.anchor.set(0.5);
-    soundButton.y = -100;
+    soundButton.y = -background.height / 2 + 150;
     soundButton.eventMode = 'static';
     soundButton.cursor = 'pointer';
     soundButton.on('pointerdown', () => {
-        const isSoundOn = onSoundToggle(); // This function should return the new state
-        soundButton.text = `Sound: ${isSoundOn ? 'ON' : 'OFF'}`;
+        const isSoundOn = onSoundToggle();
+        soundButton.text = `ЗВУК: ${isSoundOn ? 'ВКЛ' : 'ВЫКЛ'}`;
     });
     popup.addChild(soundButton);
 
     // Speed Toggle
-    const speedButton = new PIXI.Text('Speed: NORMAL', { ...context.textStyle, fontSize: 32 });
+    const speedButton = new PIXI.Text('СКОРОСТЬ: ОБЫЧНАЯ', { ...context.textStyle, fontSize: 32, fill: '#FFFFFF' });
     speedButton.anchor.set(0.5);
-    speedButton.y = 0;
+    speedButton.y = -background.height / 2 + 220;
     speedButton.eventMode = 'static';
     speedButton.cursor = 'pointer';
     speedButton.on('pointerdown', () => {
-        const newSpeed = onSpeedToggle(); // This function should return the new speed mode string
-        speedButton.text = `Speed: ${newSpeed}`;
+        const newSpeed = onSpeedToggle();
+        let speedText = '';
+        switch (newSpeed) {
+            case 'NORMAL': speedText = 'ОБЫЧНАЯ'; break;
+            case 'TURBO': speedText = 'ТУРБО'; break;
+            case 'QUICK': speedText = 'БЫСТРАЯ'; break;
+        }
+        speedButton.text = `СКОРОСТЬ: ${speedText}`;
     });
     popup.addChild(speedButton);
 
     // Payout Table Button
-    const payoutButton = new PIXI.Text('Payout Table', { ...context.textStyle, fontSize: 32 });
+    const payoutButton = new PIXI.Text('ТАБЛИЦА ВЫПЛАТ', { ...context.textStyle, fontSize: 32, fill: '#FFFFFF' });
     payoutButton.anchor.set(0.5);
-    payoutButton.y = 100;
+    payoutButton.y = -background.height / 2 + 290;
     payoutButton.eventMode = 'static';
     payoutButton.cursor = 'pointer';
     payoutButton.on('pointerdown', onPayoutTable);
     popup.addChild(payoutButton);
 
-
-    const closeButton = new PIXI.Text('X', { ...context.textStyle, fontSize: 24, fill: '#FF0000' });
+    const closeButton = new PIXI.Text('X', { ...context.textStyle, fontSize: 30, fill: '#FF0000' });
     closeButton.anchor.set(0.5);
-    closeButton.x = 330;
-    closeButton.y = -230;
+    closeButton.x = background.width / 2 - 40;
+    closeButton.y = -background.height / 2 + 40;
     closeButton.interactive = true;
     closeButton.buttonMode = true;
     closeButton.on('pointerdown', () => {

@@ -9,7 +9,7 @@ export class UI {
         this.app = app;
         
         this.container = new PIXI.Container();
-        this.textStyle = new PIXI.TextStyle({ fontFamily: 'Arial Black', fontSize: 42, fontWeight: '900', fill: '#f7d9a3', stroke: '#5c3a0a', strokeThickness: 5 });
+        this.textStyle = new PIXI.TextStyle({ fontFamily: 'Cyberpunk', fontSize: 42, fontWeight: '900', fill: '#f7d9a3', stroke: '#5c3a0a', strokeThickness: 5 });
     
         this.infoPanel = new InfoPanel(app);
         this.betController = new BetController(app, increaseBetCallback, decreaseBetCallback, setBetCallback);

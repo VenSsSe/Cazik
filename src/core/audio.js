@@ -1,6 +1,10 @@
 // --- audio.js ---
 
 export class AudioManager {
+    constructor() {
+        this._isMuted = false;
+    }
+
     load() {
         // Загружаем звуки, давая им псевдонимы (alias)
         PIXI.sound.add('spin_sound', 'assets/audio/spin.mp3');
@@ -15,5 +19,14 @@ export class AudioManager {
         if (PIXI.sound.exists(alias)) {
             PIXI.sound.play(alias);
         }
+    }
+
+    toggleMute() {
+        this._isMuted = !this._isMuted;
+        PIXI.sound.toggleMute();
+    }
+
+    get isMuted() {
+        return this._isMuted;
     }
 }
