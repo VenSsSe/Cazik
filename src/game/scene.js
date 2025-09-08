@@ -1,8 +1,8 @@
-// --- scene.js (Исправленная и улучшенная версия) ---
+// --- scene.js (Новая версия с правильной композицией) ---
 
 export function createScene(app) {
     // --- 1. Фон ---
-    // Основной фон, который растягивается на весь экран
+    // Растягиваем основной фон на весь экран
     const background = PIXI.Sprite.from('background_olympus');
     background.anchor.set(0.5);
     background.x = app.screen.width / 2;
@@ -12,27 +12,28 @@ export function createScene(app) {
     app.stage.addChild(background);
 
     // --- 2. Центральная игровая зона ---
-    // Фон для самих барабанов (темный узор)
-    // Мы будем позиционировать все остальные элементы относительно него
+    // Теперь это главный элемент, от которого все будет строиться.
+    // Используем красивую декоративную рамку!
+    const mainGameFrame = PIXI.Sprite.from('symbol_frame');
+    mainGameFrame.anchor.set(0.5);
+    mainGameFrame.x = app.screen.width / 2;
+    mainGameFrame.y = app.screen.height / 2 - 30; // Немного сдвигаем вверх для баланса
+    mainGameFrame.scale.set(1.1); // Масштабируем до нужного размера
+    app.stage.addChild(mainGameFrame);
+
+    // Фон для самих символов кладем ПОД рамку, но НАД основным фоном.
+    // Он должен быть чуть меньше рамки.
     const reelsBackground = PIXI.Sprite.from('reels_background');
     reelsBackground.anchor.set(0.5);
-    reelsBackground.x = app.screen.width / 2;
-    reelsBackground.y = app.screen.height / 2 - 50; // Немного сдвигаем вверх
-    reelsBackground.scale.set(0.85); // Делаем игровое поле чуть меньше
+    reelsBackground.x = mainGameFrame.x;
+    reelsBackground.y = mainGameFrame.y;
+    // Подгоняем размер под внутреннюю часть рамки
+    reelsBackground.width = mainGameFrame.width - 40;
+    reelsBackground.height = mainGameFrame.height - 40;
     app.stage.addChild(reelsBackground);
-
-    // Рамка, которая будет НАД барабанами
-    // Используем 'game_board_frame.png' вместо 'symbol_frame'
-    const symbolGridFrame = PIXI.Sprite.from('game_board_frame.png');
-    symbolGridFrame.anchor.set(0.5);
-    symbolGridFrame.x = reelsBackground.x;
-    symbolGridFrame.y = reelsBackground.y;
-    // Масштабируем рамку, чтобы она была чуть больше фона барабанов
-    const framePadding = 40; // Отступ рамки от фона
-    symbolGridFrame.width = reelsBackground.width + framePadding;
-    symbolGridFrame.height = reelsBackground.height + framePadding;
-    app.stage.addChild(symbolGridFrame);
-
+    
+    // Важно: добавляем рамку еще раз в конце, чтобы она была поверх символов.
+    // Но сначала создадим другие элементы.
 
     // --- 3. Панели интерфейса ---
     // Нижняя панель
@@ -41,34 +42,39 @@ export function createScene(app) {
     bottomPanel.x = app.screen.width / 2;
     bottomPanel.y = app.screen.height;
     bottomPanel.width = app.screen.width;
-    bottomPanel.height = 180; // Высота панели
+    bottomPanel.height = 180;
     app.stage.addChild(bottomPanel);
 
     // Левая боковая панель
     const leftPanel = PIXI.Sprite.from('ui_panel_top_win');
     leftPanel.anchor.set(0.5);
-    leftPanel.x = 120;
+    leftPanel.x = 180; // Сдвигаем левее
     leftPanel.y = app.screen.height / 2;
-    leftPanel.rotation = Math.PI / 2; // Поворот на 90 градусов
-    leftPanel.scale.set(1.2, 1.0); // Растягиваем по новой "высоте"
+    leftPanel.rotation = Math.PI / 2;
+    leftPanel.scale.set(1.2, 1.1); // Немного подгоняем пропорции
     app.stage.addChild(leftPanel);
 
-    // Верхняя панель
+    // Верхняя панель для информации о выигрыше
     const topWinPanel = PIXI.Sprite.from('ui_panel_top_win');
     topWinPanel.anchor.set(0.5);
-    // Позиция над рамкой барабанов с небольшим отступом
-    topWinPanel.x = app.screen.width / 2;
-    topWinPanel.y = symbolGridFrame.y - symbolGridFrame.height / 2 - 50;
-    topWinPanel.scale.set(0.9);
+    topWinPanel.x = mainGameFrame.x;
+    // Ставим ее четко над основной рамкой с небольшим отступом
+    topWinPanel.y = mainGameFrame.y - mainGameFrame.height / 2 - 50;
+    topWinPanel.scale.set(0.7);
     app.stage.addChild(topWinPanel);
-
 
     // --- 4. Логотип ---
     const logo = PIXI.Sprite.from('logo_main');
     logo.anchor.set(0.5);
-    // Позиционируем справа от рамки с отступом в 80px
-    logo.x = symbolGridFrame.x + (symbolGridFrame.width / 2) + 80 + (logo.width * 0.7 / 2);
-    logo.y = app.screen.height / 2 - 50;
-    logo.scale.set(0.7);
+    // Ставим справа от основной рамки
+    logo.x = mainGameFrame.x + mainGameFrame.width / 2 + 180;
+    logo.y = mainGameFrame.y;
+    logo.scale.set(0.8);
     app.stage.addChild(logo);
+
+    // --- 5. Возвращаем рамку на передний план ---
+    // Это нужно, чтобы барабаны с символами (которые будут созданы позже)
+    // оказались под рамкой, но над фоном барабанов.
+    app.stage.addChild(mainGameFrame);
 }
+
