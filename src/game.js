@@ -43,6 +43,7 @@ export async function startSpin(isFirstFreeSpin = false) {
             this.freeSpinsManager.start(this.config.freeSpins.initialSpins);
             this.character.setPowerState(true);
             if(this.autoplayManager.isActive) this.autoplayManager.stop();
+            this.app.symbolGridFrame.texture = PIXI.Assets.get('symbol_frame_animated'); // Change to animated frame
             showCongratsPopup(this, startSpin.bind(this));
             return; 
         } 
@@ -107,6 +108,7 @@ export async function startSpin(isFirstFreeSpin = false) {
         this.character.setPowerState(false);
         this.ui.hideFreeSpins();
         if(this.autoplayManager.isActive) this.autoplayManager.stop();
+        this.app.symbolGridFrame.texture = PIXI.Assets.get('symbol_frame'); // Change back to static frame
     }
     
     this.isSpinning = false;

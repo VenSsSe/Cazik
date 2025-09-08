@@ -21,6 +21,8 @@ export async function loadAssets() {
         { alias: 'game_board_frame', src: 'assets/ui/frames/game_board_frame.jpg' },
                 { alias: 'symbol_grid_frame_white', src: 'assets/ui/frames/symbol_grid_frame_white.png' },
         { alias: 'symbol_grid_frame_black', src: 'assets/ui/frames/symbol_grid_frame _ black.png' },
+        { alias: 'symbol_frame', src: 'assets/ui/panels/symbol_frame.png' }, // New frame
+        { alias: 'symbol_frame_animated', src: 'assets/ui/panels/symbol_frame_animated.png' }, // Animated frame
         { alias: 'logo', src: 'assets/ui/logo/logo.png' },
         { alias: 'ui_panel_bottom', src: 'assets/ui/panels/ui_panel_bottom.png' },
 

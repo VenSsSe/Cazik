@@ -26,7 +26,7 @@ export class Character {
         this.sprite.animationSpeed = 0.125; // Можно подобрать скорость
         this.sprite.play();
         this.sprite.anchor.set(0.5);
-        this.sprite.scale.set(4); // Увеличиваем кота
+        this.sprite.scale.set(3.5); // Увеличиваем кота
         
         this.sprite.x = this.app.screen.width - 200;
         this.sprite.y = this.app.screen.height / 2 + 150;

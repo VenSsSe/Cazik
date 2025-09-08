@@ -7,7 +7,7 @@ export class BetController {
 
         this.container = new PIXI.Container();
         this.container.x = app.screen.width / 2 - 350;
-        this.container.y = app.screen.height - 90;
+        this.container.y = app.screen.height - 100;
         app.stage.addChild(this.container);
 
         this.textStyle = new PIXI.TextStyle({
