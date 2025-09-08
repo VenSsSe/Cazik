@@ -1,20 +1,25 @@
 import { createButtons } from './ui/buttons.js';
 import { createPanels } from './ui/panels.js';
-import { showAutoplayPopup as showAutoplayPopupFromModule } from './ui/popups.js';
+import { showAutoplayPopup as showAutoplayPopupFromModule, showSettingsPopup as showSettingsPopupFromModule } from './ui/popups.js';
+import { InfoPanel } from './ui/InfoPanel.js';
+import { BetController } from './ui/BetController.js';
 
 export class UI {
-    constructor(app, spinCallback, increaseBet, decreaseBet, anteCallback, buyCallback, autoplayCallback) {
+    constructor(app, { spinCallback, increaseBetCallback, decreaseBetCallback, setBetCallback, anteCallback, buyCallback, autoplayCallback, settingsCallback }) {
         this.app = app;
-        // Callbacks
-        this.spinCallback = spinCallback;
-        this.increaseBet = increaseBet;
-        this.decreaseBet = decreaseBet;
-        this.anteCallback = anteCallback;
-        this.buyCallback = buyCallback;
-        this.autoplayCallback = autoplayCallback;
         
         this.container = new PIXI.Container();
         this.textStyle = new PIXI.TextStyle({ fontFamily: 'Arial Black', fontSize: 42, fontWeight: '900', fill: '#f7d9a3', stroke: '#5c3a0a', strokeThickness: 5 });
+    
+        this.infoPanel = new InfoPanel(app);
+        this.betController = new BetController(app, increaseBetCallback, decreaseBetCallback, setBetCallback);
+
+        // Pass callbacks to the context for createButtons
+        this.spinCallback = spinCallback;
+        this.anteCallback = anteCallback;
+        this.buyCallback = buyCallback;
+        this.autoplayCallback = autoplayCallback;
+        this.settingsCallback = settingsCallback;
     }
 
     create() {
@@ -23,9 +28,12 @@ export class UI {
         createPanels(this);
     }
 
-    updateBalance(value) { this.balanceText.text = `Balance: ${value.toFixed(2)}`; }
-    updateBet(value) { this.betText.text = `Bet: ${value.toFixed(2)}`; }
-    updateWin(value) { this.winText.text = `Win: ${value.toFixed(2)}`; }
+    updateBalance(value) { this.infoPanel.updateBalance(value); }
+    updateBet(value) { 
+        this.betController.updateBetText(value);
+        this.infoPanel.updateBet(value);
+    }
+    updateWin(value) { this.infoPanel.updateWin(value); }
 
     updateSidePanel(isAnteActive) {
         this.anteButton.tint = isAnteActive ? 0x00FF00 : 0xFFFFFF;
@@ -52,11 +60,12 @@ export class UI {
     setInteractive(interactive) {
         const buttons = [
             this.spinButton,
-            this.increaseBetButton,
-            this.decreaseBetButton,
+            this.betController.increaseBetButton,
+            this.betController.decreaseBetButton,
             this.anteButton,
             this.buyButton,
             this.autoplayButton,
+            this.infoButton
         ];
 
         for (const button of buttons) {
@@ -69,6 +78,10 @@ export class UI {
 
     showAutoplayPopup(startCallback) {
         showAutoplayPopupFromModule(this, startCallback);
+    }
+
+    showSettingsPopup(callbacks) {
+        showSettingsPopupFromModule(this, callbacks);
     }
 
     updateTumbleWin(value) {

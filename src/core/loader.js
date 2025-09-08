@@ -18,15 +18,16 @@ export async function loadAssets() {
         // Статичные UI и фоновые изображения
         { alias: 'background_olympus', src: 'assets/images/backgrounds/background_olympus.jpg' },
         { alias: 'reels_background', src: 'assets/images/backgrounds/reels_background.png' },
-        { alias: 'game_board_frame', src: 'assets/ui/frames/game_board_frame.png' },
+        { alias: 'game_board_frame', src: 'assets/ui/frames/game_board_frame.jpg' },
                 { alias: 'symbol_grid_frame_white', src: 'assets/ui/frames/symbol_grid_frame_white.png' },
         { alias: 'symbol_grid_frame_black', src: 'assets/ui/frames/symbol_grid_frame _ black.png' },,
-        { alias: 'logo', src: 'assets/ui/logo/logo.png' },
+                { alias: 'logo', src: 'assets/ui/logo/logo.png' },
+        { alias: 'ui_panel_bottom', src: 'assets/ui/panels/ui_panel_bottom.png' },,
 
         // Кнопки и попапы
         { alias: 'ui_button_spin', src: 'assets/ui/buttons/restart.png' },
-        { alias: 'ui_button_plus', src: 'assets/ui/buttons/97.png' },
-        { alias: 'ui_button_minus', src: 'assets/ui/buttons/98.png' },
+                { alias: 'ui_button_plus', src: 'assets/ui/buttons/plus.png' },
+        { alias: 'ui_button_minus', src: 'assets/ui/buttons/minus.png' },
         { alias: 'ui_button_autoplay', src: 'assets/ui/buttons/next.png' },
         { alias: 'ui_button_buyfeature', src: 'assets/ui/buttons/shop.png' },
         { alias: 'ui_button_ante', src: 'assets/ui/buttons/upgrade.png' },

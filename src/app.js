@@ -7,6 +7,7 @@ import { Character } from './features/character.js';
 import { BonusManager } from './features/bonus.js';
 import { AutoplayManager } from './features/autoplay.js';
 import { AudioManager } from './core/audio.js';
+import { SpeedManager } from './features/SpeedManager.js';
 import * as game from './game.js';
 
 const app = new PIXI.Application();
@@ -23,6 +24,7 @@ const context = {
     autoplayManager: null,
     character: null,
     audioManager: null,
+    speedManager: null,
     isSpinning: false,
     playerBalance: 1000,
     currentBet: 10,
@@ -54,7 +56,10 @@ export async function init() {
     context.symbols = loadedData.symbols;
     
     createScene(app);
+
+    context.speedManager = new SpeedManager();
     context.grid = new Grid(app, context.symbols);
+    context.grid.speedManager = context.speedManager;
     context.grid.create();
 
     context.character = new Character(app);
@@ -67,12 +72,23 @@ export async function init() {
     const boundHandleAutoplay = game.handleAutoplay.bind(context);
     const boundIncreaseBet = game.increaseBet.bind(context);
     const boundDecreaseBet = game.decreaseBet.bind(context);
+    const boundSetBet = game.setBet.bind(context);
+    const boundHandleSettingsClick = game.handleSettingsClick.bind(context);
 
     context.freeSpinsManager = new FreeSpinsManager();
     context.bonusManager = new BonusManager();
-    context.autoplayManager = new AutoplayManager(boundStartSpin);
+    context.autoplayManager = new AutoplayManager(boundStartSpin, context.speedManager);
 
-    context.ui = new UI(app, boundStartSpin, boundIncreaseBet, boundDecreaseBet, boundHandleAnteToggle, boundHandleBuyBonus, boundHandleAutoplay);
+    context.ui = new UI(app, {
+        spinCallback: boundStartSpin,
+        increaseBetCallback: boundIncreaseBet,
+        decreaseBetCallback: boundDecreaseBet,
+        setBetCallback: boundSetBet,
+        anteCallback: boundHandleAnteToggle,
+        buyCallback: boundHandleBuyBonus,
+        autoplayCallback: boundHandleAutoplay,
+        settingsCallback: boundHandleSettingsClick
+    });
     context.ui.create();
     context.ui.updateSidePanel(context.bonusManager.isAnteBetActive);
     context.ui.updateBalance(context.playerBalance);

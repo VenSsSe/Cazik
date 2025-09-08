@@ -17,26 +17,16 @@ function createButton(context, texture, x, y, callback, scale = 0.8) {
 }
 
 export function createButtons(context) {
+    const yPos = context.app.screen.height - 90;
+
+    // Left side buttons
+    context.infoButton = createButton(context, 'ui_button_info', 80, yPos, context.settingsCallback, 0.4);
+    
+    // These buttons seem to be part of a different panel (left side panel)
     context.buyButton = createButton(context, 'ui_button_buyfeature', 180, context.app.screen.height - 250, context.buyCallback, 0.5);
     context.anteButton = createButton(context, 'ui_button_ante', 180, context.app.screen.height - 120, context.anteCallback, 0.5);
 
-    context.spinButton = createButton(context, 'ui_button_spin', context.app.screen.width / 2, context.app.screen.height - 100, context.spinCallback, 0.7);
-
-    context.autoplayButton = createButton(context, 'ui_button_autoplay', context.app.screen.width / 2 + 180, context.app.screen.height - 100, context.autoplayCallback, 0.5);
-
-    const betGroup = new PIXI.Container();
-    betGroup.x = context.app.screen.width / 2 - 350;
-    betGroup.y = context.app.screen.height - 100;
-    context.container.addChild(betGroup);
-    
-    context.increaseBetButton = createButton(context, 'ui_button_plus', 120, 0, context.increaseBet, 0.4);
-    context.decreaseBetButton = createButton(context, 'ui_button_minus', -120, 0, context.decreaseBet, 0.4);
-    betGroup.addChild(
-        context.increaseBetButton,
-        context.decreaseBetButton
-    );
-
-    context.betText = new PIXI.Text('', context.textStyle);
-    context.betText.anchor.set(0.5);
-    betGroup.addChild(context.betText);
+    // Center buttons
+    context.spinButton = createButton(context, 'ui_button_spin', context.app.screen.width / 2, yPos, context.spinCallback, 0.7);
+    context.autoplayButton = createButton(context, 'ui_button_autoplay', context.app.screen.width / 2 + 180, yPos, context.autoplayCallback, 0.5);
 }

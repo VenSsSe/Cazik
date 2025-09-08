@@ -1,16 +1,5 @@
 export function createPanels(context) {
-    context.balanceText = new PIXI.Text('', context.textStyle);
-    context.balanceText.anchor.set(0, 0.5);
-    context.balanceText.x = 50;
-    context.balanceText.y = context.app.screen.height - 100;
-    context.container.addChild(context.balanceText);
-    
-    context.winText = new PIXI.Text('', context.textStyle);
-    context.winText.anchor.set(1, 0.5);
-    context.winText.x = context.app.screen.width - 50;
-    context.winText.y = context.app.screen.height - 100;
-    context.container.addChild(context.winText);
-
+    // Free Spins Display
     context.fsContainer = new PIXI.Container();
     context.fsContainer.visible = false;
     const fsTextStyle = new PIXI.TextStyle({ 
@@ -28,6 +17,7 @@ export function createPanels(context) {
     context.fsContainer.addChild(context.fsText);
     context.app.stage.addChild(context.fsContainer);
 
+    // Tumble Win Display
     const tumbleWinStyle = new PIXI.TextStyle({
         fontFamily: 'Arial Black',
         fontSize: 36,
@@ -38,7 +28,7 @@ export function createPanels(context) {
     context.tumbleWinText = new PIXI.Text('', tumbleWinStyle);
     context.tumbleWinText.anchor.set(0.5);
     context.tumbleWinText.x = context.app.screen.width / 2;
-    context.tumbleWinText.y = 120;
+    context.tumbleWinText.y = context.app.screen.height / 2 - 450;
     context.tumbleWinText.visible = false;
     context.container.addChild(context.tumbleWinText);
 }

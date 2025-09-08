@@ -172,3 +172,33 @@ export function decreaseBet() {
         this.ui.updateBet(newBet);
     }
 }
+
+export function setBet(value) {
+    if (this.isSpinning || this.autoplayManager.isActive) return;
+    this.currentBet = value;
+    if (this.currentBet > this.config.maxBet) this.currentBet = this.config.maxBet;
+    if (this.currentBet < this.config.minBet) this.currentBet = this.config.minBet;
+    const newBet = this.bonusManager.getSpinCost(this.currentBet);
+    this.ui.updateBet(newBet);
+}
+
+export function handleSettingsClick() {
+    const onSoundToggle = () => {
+        // TODO: Implement sound toggle logic
+        console.log('Sound toggled');
+        return true; // placeholder
+    };
+
+    const onSpeedToggle = () => {
+        // TODO: Implement speed toggle logic
+        console.log('Speed toggled');
+        return 'NORMAL'; // placeholder
+    };
+
+    const onPayoutTable = () => {
+        // TODO: Implement payout table logic
+        console.log('Payout table opened');
+    };
+
+    this.ui.showSettingsPopup({ onSoundToggle, onSpeedToggle, onPayoutTable });
+}

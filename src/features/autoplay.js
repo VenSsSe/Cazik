@@ -1,11 +1,12 @@
-// --- autoplay.js ---
+import { SpeedModes } from './SpeedManager.js';
 
 /**
  * Управляет сессией автоигры.
  */
 export class AutoplayManager {
-    constructor(spinFunction) {
+    constructor(spinFunction, speedManager) {
         this.spinFunction = spinFunction; // Функция, которая запускает спин
+        this.speedManager = speedManager;
         this.spinsRemaining = 0;
     }
 
@@ -34,6 +35,7 @@ export class AutoplayManager {
     stop() {
         console.log("--- АВТОИГРА ОСТАНОВЛЕНА ---");
         this.spinsRemaining = 0;
+        this.speedManager.setSpeed(SpeedModes.NORMAL);
     }
 
     /**
@@ -44,7 +46,7 @@ export class AutoplayManager {
         if (this.isActive) {
             this.spinsRemaining--;
             // Увеличим задержку для наглядности
-            setTimeout(() => this.spinFunction(), 1500); // Увеличиваем задержку до 1.5 секунд
+            setTimeout(() => this.spinFunction(), 200);
         }
     }
 }

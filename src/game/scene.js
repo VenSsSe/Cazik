@@ -26,7 +26,15 @@ export function createScene(app) {
     gameFrame.anchor.set(0.5);
     gameFrame.x = app.screen.width / 2;
     gameFrame.y = app.screen.height / 2 - 50; // Смещаем туда же, куда и фон барабанов
-    const frameScale = (reelsBackground.width + 50) / gameFrame.texture.width;
-    gameFrame.scale.set(frameScale);
-    app.stage.addChild(gameFrame);
+        gameFrame.width = reelsBackground.width;
+    gameFrame.height = reelsBackground.height;
+        app.stage.addChild(gameFrame);
+
+    // Bottom Panel
+    const bottomPanel = PIXI.Sprite.from('ui_panel_bottom');
+    bottomPanel.anchor.set(0.5, 1);
+    bottomPanel.x = app.screen.width / 2;
+    bottomPanel.y = app.screen.height;
+    bottomPanel.width = app.screen.width;
+    app.stage.addChild(bottomPanel);
 }

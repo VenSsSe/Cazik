@@ -57,9 +57,9 @@ export async function removeSymbols(symbolsToRemove) {
             };
 
             // Step 1: Scale Up
-            scaleTo(cellContainer, originalScaleX * 1.1, originalScaleY * 1.1, 200, () => {
+            scaleTo(cellContainer, originalScaleX * 1.1, originalScaleY * 1.1, this.speedManager.getDuration(200), () => {
                 // Step 2: Flip (Phase 1)
-                scaleTo(cellContainer, 0, originalScaleY * 1.1, 150, () => {
+                scaleTo(cellContainer, 0, originalScaleY * 1.1, this.speedManager.getDuration(200), () => {
                     // Step 3: Transformation
                     const symbolData = this.gridData[cellContainer.gridPosition.col][cellContainer.gridPosition.row];
                     if (symbolData && symbolData.id) {
@@ -81,18 +81,18 @@ export async function removeSymbols(symbolsToRemove) {
 
 
                     // Step 4: Flip (Phase 2)
-                    scaleTo(cellContainer, originalScaleX * 1.1, originalScaleY * 1.1, 150, () => {
+                    scaleTo(cellContainer, originalScaleX * 1.1, originalScaleY * 1.1, this.speedManager.getDuration(200), () => {
                         // Step 5: Pause
                         setTimeout(() => {
                             // Step 6: Fade Out
-                            fadeOut(cellContainer, 300, () => {
+                            fadeOut(cellContainer, this.speedManager.getDuration(300), () => {
                                 const { col, row } = cellContainer.gridPosition;
                                 this.gridData[col][row] = null;
                                 this.gridSprites[col][row] = null;
                                 cellContainer.destroy();
                                 resolve();
                             });
-                        }, 500); // 0.5s pause
+                        }, this.speedManager.getDuration(500)); // 0.5s pause
                     });
                 });
             });
@@ -128,7 +128,7 @@ export function tumbleDown() {
                     sprite.gridPosition.row = newRow;
 
                     const targetY = newRow * this.SYMBOL_SIZE + this.SYMBOL_SIZE / 2;
-                    animations.push(this.animateTo(sprite, targetY, 0.4));
+                    animations.push(this.animateTo(sprite, targetY, this.speedManager.getDuration(0.4)));
                 }
             }
         }
@@ -166,7 +166,7 @@ export function refillGrid() {
                     this.reelsContainer.children[i].addChild(sprite);
 
                     const targetY = j * this.SYMBOL_SIZE + this.SYMBOL_SIZE / 2;
-                    animations.push(this.animateTo(sprite, targetY, 0.4));
+                    animations.push(this.animateTo(sprite, targetY, this.speedManager.getDuration(0.4)));
                 }
             }
         }
@@ -184,8 +184,8 @@ export function refillGrid() {
  * Основная анимация вращения барабанов.
  */
 export async function spin() {
-    const REEL_FALL_DELAY = 60;
-    const REEL_DROP_DELAY = 80;
+    const REEL_FALL_DELAY = 40;
+    const REEL_DROP_DELAY = 60;
 
     const fallOutAnimations = [];
     const allCurrentSprites = this.gridSprites.flat().filter(sprite => sprite !== null);
@@ -194,7 +194,7 @@ export async function spin() {
         const col = sprite.gridPosition.col;
         const delay = (this.REEL_COUNT - 1 - col) * REEL_FALL_DELAY;
         const targetY = (this.ROW_COUNT * this.SYMBOL_SIZE) + this.SYMBOL_SIZE;
-        fallOutAnimations.push(this.animateTo(sprite, targetY, 0.4, delay)); 
+        fallOutAnimations.push(this.animateTo(sprite, targetY, this.speedManager.getDuration(0.3), delay)); 
     }
     
     await Promise.all(fallOutAnimations);
@@ -220,7 +220,7 @@ export async function spin() {
 
             const targetY = j * this.SYMBOL_SIZE + this.SYMBOL_SIZE / 2;
             const delay = i * REEL_DROP_DELAY;
-            fallInAnimations.push(this.animateTo(sprite, targetY, 0.5, delay));
+            fallInAnimations.push(this.animateTo(sprite, targetY, this.speedManager.getDuration(0.4), delay));
         }
     }
     
