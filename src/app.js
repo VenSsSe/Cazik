@@ -1,7 +1,7 @@
 import { loadAssets } from './core/loader.js';
 import { createScene } from './game/scene.js';
 import { Grid } from './game/grid.js';
-import { UI } from './core/ui.js';
+import { UI } from './core/ui/index.js';
 import { FreeSpinsManager } from './features/freeSpins.js';
 import { Character } from './features/character.js';
 import { BonusManager } from './features/bonus.js';

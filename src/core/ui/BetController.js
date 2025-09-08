@@ -23,8 +23,8 @@ export class BetController {
     }
 
     createComponents() {
-        this.increaseBetButton = this.createButton('ui_button_plus', 120, 0, this.increaseBetCallback, 0.4);
-        this.decreaseBetButton = this.createButton('ui_button_minus', -120, 0, this.decreaseBetCallback, 0.4);
+        this.increaseBetButton = this.createButton('ui_button_plus', 120, 0, this.increaseBetCallback, 0.1);
+        this.decreaseBetButton = this.createButton('ui_button_minus', -120, 0, this.decreaseBetCallback, 0.1);
         
         this.betText = new PIXI.Text('', this.textStyle);
         this.betText.anchor.set(0.5);
