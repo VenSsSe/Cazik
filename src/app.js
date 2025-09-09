@@ -99,9 +99,7 @@ export async function init() {
     // --- 5. Плавное появление игрового интерфейса ---
     fadeInGameContainer();
 
-    // Initialize and create UI
-    context.ui = new UI(context);
-    context.ui.create();
+    // --- УДАЛЕНО: Лишнее создание UI было здесь ---
 }
 
 function resize() {

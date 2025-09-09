@@ -13,9 +13,6 @@ export class InfoPanel {
             strokeThickness: 5
         });
 
-        // --- Располагаем тексты на нижней панели ---
-        // Позиционирование теперь управляется родительским контейнером (UI)
-
         // Текст Баланса (слева)
         this.balanceText = new PIXI.Text('', textStyle);
         this.balanceText.anchor.set(0, 0.5);
@@ -25,6 +22,10 @@ export class InfoPanel {
         this.winText = new PIXI.Text('', textStyle);
         this.winText.anchor.set(1, 0.5);
         this.container.addChild(this.winText);
+
+        // --- Позиционируем элементы внутри этого компонента ---
+        this.balanceText.x = 50;
+        this.winText.x = this.app.screen.width - 50;
     }
 
     updateBalance(value) {
@@ -40,3 +41,4 @@ export class InfoPanel {
         this.winText.text = `ВЫИГРЫШ: ${value.toFixed(2)}`;
     }
 }
+

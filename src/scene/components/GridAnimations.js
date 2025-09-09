@@ -1,9 +1,7 @@
-// src/game/grid-animations.js
+// src/scene/components/GridAnimations.js
 
 /**
  * Анимация и удаление выигрышных символов.
- * ВАЖНО: Эта функция должна вызываться с контекстом (this) вашего класса Grid.
- * Пример: removeSymbols.call(myGridInstance, symbolsToRemove);
  * @param {Array<PIXI.Container>} symbolsToRemove - Список контейнеров для удаления.
  * @returns {Promise<void>}
  */
@@ -19,6 +17,7 @@ export async function removeSymbols(symbolsToRemove) {
             const originalScaleX = cellContainer.scale.x;
             const originalScaleY = cellContainer.scale.y;
 
+            // Эта локальная функция анимации ожидает длительность в МИЛЛИСЕКУНДАХ
             const scaleTo = (target, toX, toY, duration, onComplete) => {
                 const startX = target.scale.x;
                 const startY = target.scale.y;
@@ -40,6 +39,7 @@ export async function removeSymbols(symbolsToRemove) {
                 requestAnimationFrame(animate);
             };
 
+            // Эта локальная функция анимации ожидает длительность в МИЛЛИСЕКУНДАХ
             const fadeOut = (target, duration, onComplete) => {
                 const startAlpha = target.alpha;
                 const change = 0 - startAlpha;
@@ -81,20 +81,19 @@ export async function removeSymbols(symbolsToRemove) {
                         console.warn(`Could not find texture: symbol_grid_frame_black`);
                     }
 
-
                     // Step 4: Flip (Phase 2)
                     scaleTo(cellContainer, originalScaleX * 1.1, originalScaleY * 1.1, this.context.speedManager.getDuration(200), () => {
-                        // Step 5: Pause
+                        // Step 5: Pause (setTimeout использует миллисекунды, здесь все верно)
                         setTimeout(() => {
                             // Step 6: Fade Out
-                                    fadeOut(cellContainer, this.context.speedManager.getDuration(300), () =>{
+                            fadeOut(cellContainer, this.context.speedManager.getDuration(300), () =>{
                                 const { col, row } = cellContainer.gridPosition;
                                 this.gridData[col][row] = null;
                                 this.gridSprites[col][row] = null;
                                 cellContainer.destroy();
                                 resolve();
                             });
-                        }, this.context.speedManager.getDuration(500)); // 0.5s pause
+                        }, this.context.speedManager.getDuration(500));
                     });
                 });
             });
@@ -106,7 +105,6 @@ export async function removeSymbols(symbolsToRemove) {
 
 /**
  * Реализует механику "падения" символов вниз.
- * ВАЖНО: Должна вызываться с контекстом this. Пример: tumbleDown.call(myGridInstance);
  * @returns {Promise<void>}
  */
 export function tumbleDown() {
@@ -130,8 +128,9 @@ export function tumbleDown() {
 
                     sprite.gridPosition.row = newRow;
 
-                    const targetY = newRow * this.SYMBOL_SIZE + this.SYMBOL_SIZE / 2;
-                    animations.push(this.animateTo(sprite, targetY, this.context.speedManager.getDuration(400)));
+                    const targetY = (newRow - (this.ROW_COUNT - 1) / 2) * this.SYMBOL_SIZE;
+                    // ИСПРАВЛЕНО: Длительность в СЕКУНДАХ (было 0.4)
+                    animations.push(this.animateTo(sprite, targetY, this.context.speedManager.getDuration(0.5)));
                 }
             }
         }
@@ -147,7 +146,6 @@ export function tumbleDown() {
 
 /**
  * Заполняет пустые места новыми символами сверху.
- * ВАЖНО: Должна вызываться с контекстом this. Пример: refillGrid.call(myGridInstance);
  * @returns {Promise<void>}
  */
 export function refillGrid() {
@@ -162,15 +160,16 @@ export function refillGrid() {
                     const symbolData = this.getRandomSymbol();
                     const sprite = this.createSymbolSprite(symbolData, i, j);
                     
-                    sprite.y = -newSymbolsCount * this.SYMBOL_SIZE + this.SYMBOL_SIZE / 2;
+                    sprite.y = -(newSymbolsCount + (this.ROW_COUNT - 1) / 2) * this.SYMBOL_SIZE;
                     
                     this.gridData[i][j] = symbolData;
                     this.gridSprites[i][j] = sprite;
                     
                     this.reelsContainer.children[i].addChild(sprite);
 
-                    const targetY = j * this.SYMBOL_SIZE + this.SYMBOL_SIZE / 2;
-                    animations.push(this.animateTo(sprite, targetY, this.context.speedManager.getDuration(400)));
+                    const targetY = (j - (this.ROW_COUNT - 1) / 2) * this.SYMBOL_SIZE;
+                    // ИСПРАВЛЕНО: Длительность в СЕКУНДАХ (было 0.4)
+                    animations.push(this.animateTo(sprite, targetY, this.context.speedManager.getDuration(0.5)));
                 }
             }
         }
@@ -186,7 +185,6 @@ export function refillGrid() {
 
 /**
  * Основная анимация вращения барабанов.
- * ВАЖНО: Должна вызываться с контекстом this. Пример: spin.call(myGridInstance);
  */
 export async function spin() {
     const REEL_FALL_DELAY = 40;
@@ -198,9 +196,10 @@ export async function spin() {
     for (const sprite of allCurrentSprites) {
         const col = sprite.gridPosition.col;
         const delay = (this.REEL_COUNT - 1 - col) * REEL_FALL_DELAY;
-        const targetY = (this.ROW_COUNT * this.SYMBOL_SIZE) + this.SYMBOL_SIZE;
-        // ИСПРАВЛЕНО: this.speedManager -> this.context.speedManager
-        fallOutAnimations.push(this.animateTo(sprite, targetY, this.context.speedManager.getDuration(300), delay)); 
+        // ИСПРАВЛЕНО: Расчет конечной позиции Y
+        const targetY = (this.ROW_COUNT * this.SYMBOL_SIZE) / 2 + this.SYMBOL_SIZE / 2;
+        // ИСПРАВЛЕНО: Длительность в СЕКУНДАХ (было 0.3)
+        fallOutAnimations.push(this.animateTo(sprite, targetY, this.context.speedManager.getDuration(0.5), delay)); 
     }
     
     await Promise.all(fallOutAnimations);
@@ -217,19 +216,20 @@ export async function spin() {
             const symbolData = this.getRandomSymbol();
             const sprite = this.createSymbolSprite(symbolData, i, j);
             
-            sprite.y = -(this.ROW_COUNT - j) * this.SYMBOL_SIZE;
+            sprite.y = -(this.ROW_COUNT - j + (this.ROW_COUNT - 1) / 2) * this.SYMBOL_SIZE;
             
             this.gridData[i][j] = symbolData;
             this.gridSprites[i][j] = sprite;
             
             this.reelsContainer.children[i].addChild(sprite);
 
-            const targetY = j * this.SYMBOL_SIZE + this.SYMBOL_SIZE / 2;
+            const targetY = (j - (this.ROW_COUNT - 1) / 2) * this.SYMBOL_SIZE;
             const delay = i * REEL_DROP_DELAY;
-            // ИСПРАВЛЕНО: this.speedManager -> this.context.speedManager
-            fallInAnimations.push(this.animateTo(sprite, targetY, this.context.speedManager.getDuration(400), delay));
+            // ИСПРАВЛЕНО: Длительность в СЕКУНДАХ (было 0.4)
+            fallInAnimations.push(this.animateTo(sprite, targetY, this.context.speedManager.getDuration(0.6), delay));
         }
     }
     
     await Promise.all(fallInAnimations);
 }
+

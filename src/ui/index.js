@@ -13,17 +13,24 @@ export class UI {
         this.textStyle = new PIXI.TextStyle({ fontFamily: 'Cyberpunk', fontSize: 42, fontWeight: '900', fill: '#f7d9a3', stroke: '#5c3a0a', strokeThickness: 5 });
         this.buttons = [];
 
-        // Передаем главный контейнер UI в дочерние компоненты
-        this.infoPanel = new InfoPanel(context, this.container);
-        this.betController = new BetController(context, this.container);
+        // Экземпляры InfoPanel и BetController теперь создаются в методе create()
+        // для контроля порядка отрисовки.
     }
 
     create() {
-        this._positionElements();
+        // 1. Сначала создаем панели, чтобы они были на заднем плане
         this._createLogo();
         this._createStaticPanels();
 
-        // Pass the UI instance itself as context to these factory functions
+        // 2. Теперь создаем InfoPanel и BetController.
+        // Их конструкторы добавят их контейнеры в this.container, и они окажутся поверх панелей.
+        this.infoPanel = new InfoPanel(this.context, this.container);
+        this.betController = new BetController(this.context, this.container);
+        
+        // 3. Позиционируем элементы
+        this._positionElements();
+
+        // 4. Создаем кнопки и динамические панели
         createButtons(this);
         createPanels(this);
 
@@ -46,12 +53,8 @@ export class UI {
         this.betController.container.x = this.app.screen.width / 2 - 300;
         this.betController.container.y = this.app.screen.height - 100;
 
-        // Позиционируем дочерние компоненты относительно контейнера UI
-        // Эти координаты также будут относительны (0,0) контейнера UI
-        this.infoPanel.balanceText.x = 50;
-        this.infoPanel.balanceText.y = this.app.screen.height - 55;
-        this.infoPanel.winText.x = this.app.screen.width - 50;
-        this.infoPanel.winText.y = this.app.screen.height - 55;
+        // Позиционируем весь контейнер InfoPanel, а не его дочерние элементы
+        this.infoPanel.container.y = this.app.screen.height - 55;
     }
 
     _createLogo() {
@@ -142,3 +145,4 @@ export class UI {
         this.tumbleWinText.visible = false;
     }
 }
+
