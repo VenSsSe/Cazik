@@ -3,16 +3,17 @@ export class BetController {
         this.app = app;
         this.increaseBetCallback = increaseBetCallback;
         this.decreaseBetCallback = decreaseBetCallback;
-        this.setBetCallback = setBetCallback; // Callback to set a specific bet value
+        this.setBetCallback = setBetCallback;
 
         this.container = new PIXI.Container();
-        this.container.x = app.screen.width / 2 - 350;
-        this.container.y = app.screen.height - 100;
+        // --- Позиционируем контейнер на нижней панели, левее кнопки СПИН ---
+        this.container.x = app.screen.width / 2 - 300;
+        this.container.y = app.screen.height - 90;
         app.stage.addChild(this.container);
 
         this.textStyle = new PIXI.TextStyle({
             fontFamily: 'Cyberpunk',
-            fontSize: 42,
+            fontSize: 38, // Тот же размер, что и в InfoPanel
             fontWeight: '900',
             fill: '#f7d9a3',
             stroke: '#5c3a0a',
@@ -23,9 +24,13 @@ export class BetController {
     }
 
     createComponents() {
-        this.increaseBetButton = this.createButton('ui_button_plus', 120, 0, this.increaseBetCallback, 0.1);
-        this.decreaseBetButton = this.createButton('ui_button_minus', -120, 0, this.decreaseBetCallback, 0.1);
+        // Кнопка "+"
+        this.increaseBetButton = this.createButton('ui_button_plus', 160, 0, this.increaseBetCallback, 0.1);
         
+        // Кнопка "-"
+        this.decreaseBetButton = this.createButton('ui_button_minus', -160, 0, this.decreaseBetCallback, 0.1);
+        
+        // Текст ставки, который теперь является кликабельной кнопкой
         this.betText = new PIXI.Text('', this.textStyle);
         this.betText.anchor.set(0.5);
         this.betText.eventMode = 'static';
@@ -48,10 +53,13 @@ export class BetController {
     }
 
     updateBetText(value) {
-        this.betText.text = `Bet: ${value.toFixed(2)}`;
+        this.betText.text = `СТАВКА\n${value.toFixed(2)}`;
+        // Делаем текст многострочным для лучшего вида
+        this.betText.style.align = 'center';
     }
 
     showBetPopup() {
+        // Функционал попапа остается без изменений, он должен работать как и раньше
         if (this.betPopup) {
             this.betPopup.destroy();
         }
@@ -62,14 +70,13 @@ export class BetController {
         popup.y = this.app.screen.height / 2;
         this.app.stage.addChild(popup);
 
-        // Используем новый спрайт для фона
         const background = PIXI.Sprite.from('bet_popup_background');
         background.anchor.set(0.5);
         popup.addChild(background);
 
         const title = new PIXI.Text('Select Bet', { ...this.textStyle, fontSize: 40, fill: '#FFFFFF' });
         title.anchor.set(0.5);
-        title.y = -background.height / 2 + 50; // Располагаем заголовок вверху попапа
+        title.y = -background.height / 2 + 50;
         popup.addChild(title);
 
         const betValues = [0.2, 0.5, 1, 2, 5, 10, 20, 50];
@@ -77,11 +84,7 @@ export class BetController {
         popup.addChild(buttonContainer);
 
         betValues.forEach((value, index) => {
-            // Для кнопок можно оставить Graphics или тоже заменить на спрайты, если они есть
-            const button = new PIXI.Graphics();
-            button.beginFill(0x333333, 0.7);
-            button.drawRoundedRect(0, 0, 120, 50, 15);
-            button.endFill();
+            const button = new PIXI.Graphics().beginFill(0x333333, 0.7).drawRoundedRect(0, 0, 120, 50, 15).endFill();
             button.interactive = true;
             button.buttonMode = true;
 
@@ -105,7 +108,6 @@ export class BetController {
             buttonContainer.addChild(button);
         });
 
-        // Центрируем контейнер с кнопками внутри попапа
         buttonContainer.x = -buttonContainer.width / 2;
         buttonContainer.y = -buttonContainer.height / 2 + 20;
 

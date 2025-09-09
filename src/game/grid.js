@@ -1,22 +1,22 @@
-// --- grid.js (Refactored) ---
+// --- grid.js (Финальная версия с правильным позиционированием) ---
 import * as animations from './grid-animations.js';
 import * as helpers from './grid-helpers.js';
 
-// Константы для сетки
+// --- НОВЫЕ КОНСТАНТЫ ---
+// Мы немного уменьшаем размер символов, чтобы вся сетка красиво поместилась в рамку с отступами.
 const REEL_COUNT = 6;
 const ROW_COUNT = 5;
-const SYMBOL_SIZE = 150; // Размер ячейки для символа
+const SYMBOL_SIZE = 150; // Уменьшенный размер ячейки для символа
 
 export class Grid {
     constructor(app, symbolsData) {
         this.app = app;
         this.symbolsData = symbolsData;
         this.reelsContainer = new PIXI.Container();
-        this.gridData = []; // Логическая сетка (данные символов)
-        this.gridSprites = []; // Визуальная сетка (спрайты символов)
+        this.gridData = [];
+        this.gridSprites = [];
         this.totalWeight = this.symbolsData.reduce((sum, symbol) => sum + symbol.weight, 0);
 
-        // Привязываем константы к экземпляру для доступа из внешних функций
         this.REEL_COUNT = REEL_COUNT;
         this.ROW_COUNT = ROW_COUNT;
         this.SYMBOL_SIZE = SYMBOL_SIZE;
@@ -43,10 +43,16 @@ export class Grid {
             }
         }
 
-        // Позиционируем контейнер точно в центре фона барабанов
-        this.reelsContainer.x = (this.app.screen.width - this.reelsContainer.width) / 2;
-        this.reelsContainer.y = (this.app.screen.height - this.reelsContainer.height) / 2 - 50; // Смещаем вверх
+        // --- НОВАЯ ЛОГИКА ПОЗИЦИОНИРОВАНИЯ ---
+        // Эти координаты точно совпадают с центром рамки из `scene.js`
+        const targetCenterX = this.app.screen.width / 2;
+        const targetCenterY = this.app.screen.height / 2 - 30;
+
+        // Центрируем контейнер с барабанами
+        this.reelsContainer.x = targetCenterX - this.reelsContainer.width / 2;
+        this.reelsContainer.y = targetCenterY - this.reelsContainer.height / 2;
         
+        // Маска для обрезки символов, чтобы они не вылезали за пределы поля при анимации
         const mask = new PIXI.Graphics();
         mask.beginFill(0xFFFFFF);
         mask.drawRect(this.reelsContainer.x, this.reelsContainer.y, this.reelsContainer.width, this.reelsContainer.height);
@@ -55,25 +61,22 @@ export class Grid {
         this.app.stage.addChild(mask);
 
         this.app.stage.addChild(this.reelsContainer);
-        console.log("Сетка символов успешно создана!");
+        console.log("Сетка символов успешно создана и спозиционирована внутри рамки!");
     }
 
     /**
-     * Создает спрайт символа С РАМКОЙ.
-     * @param {object} symbolData - Данные символа
-     * @param {number} col - колонка
-     * @param {number} row - ряд
-     * @returns {PIXI.Container} - Контейнер, содержащий рамку и символ.
+     * Создает спрайт символа с рамкой.
      */
     createSymbolSprite(symbolData, col, row) {
         const cellContainer = new PIXI.Container();
         let symbolSprite;
 
-                const frame = PIXI.Sprite.from('symbol_grid_frame');
+        // Рамка для каждой ячейки
+        const frame = PIXI.Sprite.from('symbol_grid_frame'); // Используем гранжевую рамку
         frame.width = SYMBOL_SIZE;
         frame.height = SYMBOL_SIZE;
         frame.anchor.set(0.5);
-        frame.alpha = 0.6; // Make it semi-transparent
+        frame.alpha = 0.5; // Делаем ее полупрозрачной
         cellContainer.addChild(frame);
 
         if (symbolData.type === 'multiplier') {
@@ -98,6 +101,7 @@ export class Grid {
             symbolSprite = PIXI.Sprite.from(symbolData.id);
         }
 
+        // Уменьшаем сам символ, чтобы он красиво вписывался в рамку
         symbolSprite.width = SYMBOL_SIZE * 0.9;
         symbolSprite.height = SYMBOL_SIZE * 0.9;
         symbolSprite.anchor.set(0.5);
@@ -128,6 +132,5 @@ export class Grid {
 }
 
 // Присваиваем импортированные функции прототипу класса Grid
-// Это позволяет им вызываться как методы экземпляра (this.spin(), this.animateTo(), и т.д.)
 Object.assign(Grid.prototype, animations);
 Object.assign(Grid.prototype, helpers);

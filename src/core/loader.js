@@ -19,33 +19,30 @@ export async function loadAssets() {
         { alias: 'background_olympus', src: 'assets/images/backgrounds/background_olympus.jpg' },
         { alias: 'reels_background', src: 'assets/images/backgrounds/reels_background.png' },
         { alias: 'game_board_frame', src: 'assets/ui/frames/game_board_frame.jpg' },
-                { alias: 'symbol_grid_frame_white', src: 'assets/ui/frames/symbol_grid_frame_white.png' },
-        { alias: 'symbol_grid_frame_black', src: 'assets/ui/frames/symbol_grid_frame _ black.png' },
-        { alias: 'symbol_frame', src: 'assets/ui/panels/symbol_frame.png' }, // New frame
-        { alias: 'symbol_frame_animated', src: 'assets/ui/panels/symbol_frame_animated.png' }, // Animated frame
-        { alias: 'logo', src: 'assets/ui/logo/logo.png' },
-        { alias: 'ui_panel_bottom', src: 'assets/ui/panels/ui_panel_bottom.png' },
-
-        // Новые ассеты UI
+        { alias: 'symbol_grid_frame_white', src: 'assets/ui/frames/symbol_grid_frame_white.png' },
+        { alias: 'symbol_grid_frame_black', src: 'assets/ui/frames/symbol_grid_frame_black.png' },
+        { alias: 'symbol_frame', src: 'assets/ui/panels/symbol_frame.png' },
+        { alias: 'symbol_frame_animated', src: 'assets/ui/panels/symbol_frame_animated.png' },
+        
+        // Панели, попапы и лого
         { alias: 'logo_main', src: 'assets/ui/logo/logo_game.png' },
         { alias: 'ui_panel_top_win', src: 'assets/ui/panels/ui_panel_top_win.png' },
+        { alias: 'ui_panel_left', src: 'assets/ui/panels/ui_panel_left.png' },
         { alias: 'ui_panel_bottom_main', src: 'assets/ui/panels/ui_panel_bottom.png' },
         { alias: 'bet_popup_background', src: 'assets/ui/popups/bet_popup_background.png' },
         { alias: 'popup_background_large', src: 'assets/ui/popups/popup_background_large.png' },
+        { alias: 'ui_popup_congrats', src: 'assets/ui/popups/table.png' },
+
+        // Кнопки
         { alias: 'ui_button_settings', src: 'assets/ui/buttons/button_settings.png' },
         { alias: 'ui_checkbox_checked', src: 'assets/ui/buttons/checkbox_checked.png' },
         { alias: 'ui_checkbox_unchecked', src: 'assets/ui/buttons/checkbox_unchecked.png' },
-
-
-        // Кнопки и попапы
         { alias: 'ui_button_spin', src: 'assets/ui/buttons/restart.png' },
-                { alias: 'ui_button_plus', src: 'assets/ui/buttons/plus.png' },
+        { alias: 'ui_button_plus', src: 'assets/ui/buttons/plus.png' },
         { alias: 'ui_button_minus', src: 'assets/ui/buttons/minus.png' },
         { alias: 'ui_button_autoplay', src: 'assets/ui/buttons/next.png' },
         { alias: 'ui_button_buyfeature', src: 'assets/ui/buttons/shop.png' },
-        { alias: 'ui_button_ante', src: 'assets/ui/buttons/upgrade.png' },
-        { alias: 'ui_button_info', src: 'assets/ui/buttons/button_settings.png' },
-        { alias: 'ui_popup_congrats', src: 'assets/ui/popups/table.png' }
+        { alias: 'ui_button_ante', src: 'assets/ui/buttons/upgrade.png' }
     ];
 
     // Добавляем все символы из symbols.json в массив для загрузки
