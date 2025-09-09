@@ -1,15 +1,15 @@
-import { createButtons } from './ui/buttons.js';
-import { createPanels } from './ui/panels.js';
-import { showAutoplayPopup as showAutoplayPopupFromModule, showSettingsPopup as showSettingsPopupFromModule } from './ui/popups.js';
-import { InfoPanel } from './ui/InfoPanel.js';
-import { BetController } from './ui/BetController.js';
+import { createButtons } from './components/buttons.js';
+import { createPanels } from './components/panels.js';
+import { showAutoplayPopup as showAutoplayPopupFromModule, showSettingsPopup as showSettingsPopupFromModule } from './popups/index.js';
+import { InfoPanel } from './InfoPanel.js';
+import { BetController } from './BetController.js';
 
 export class UI {
     constructor(app, { spinCallback, increaseBetCallback, decreaseBetCallback, setBetCallback, anteCallback, buyCallback, autoplayCallback, settingsCallback }) {
         this.app = app;
         
         this.container = new PIXI.Container();
-        this.textStyle = new PIXI.TextStyle({ fontFamily: 'Arial Black', fontSize: 42, fontWeight: '900', fill: '#f7d9a3', stroke: '#5c3a0a', strokeThickness: 5 });
+        this.textStyle = new PIXI.TextStyle({ fontFamily: 'Cyberpunk', fontSize: 42, fontWeight: '900', fill: '#f7d9a3', stroke: '#5c3a0a', strokeThickness: 5 });
     
         this.infoPanel = new InfoPanel(app);
         this.betController = new BetController(app, increaseBetCallback, decreaseBetCallback, setBetCallback);

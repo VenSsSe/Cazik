@@ -1,14 +1,14 @@
-import { loadAssets } from './core/loader.js';
-import { createScene } from './game/scene.js';
-import { Grid } from './game/grid.js';
-import { UI } from './core/ui/index.js';
-import { FreeSpinsManager } from './features/freeSpins.js';
-import { Character } from './features/character.js';
-import { BonusManager } from './features/bonus.js';
-import { AutoplayManager } from './features/autoplay.js';
-import { AudioManager } from './core/audio.js';
-import { SpeedManager } from './features/SpeedManager.js';
-import * as game from './game.js';
+import { loadAssets } from './core/AssetLoader.js';
+import { createScene } from './scene/GameScene.js';
+import { Grid } from './scene/components/Grid.js';
+import { UI } from './ui/index.js';
+import { FreeSpinsManager } from './features/FreeSpinsManager.js';
+import { Character } from './game/Character.js';
+import { BonusManager } from './features/BonusManager.js';
+import { AutoplayManager } from './features/AutoplayManager.js';
+import { AudioManager } from './core/AudioManager.js';
+import { SpeedManager } from './game/SpeedManager.js';
+import * as game from './game/index.js';
 
 const app = new PIXI.Application();
 

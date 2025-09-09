@@ -1,6 +1,6 @@
 // --- grid.js (Финальная версия с правильным позиционированием) ---
-import * as animations from './grid-animations.js';
-import * as helpers from './grid-helpers.js';
+import * as animations from './GridAnimations.js';
+import * as helpers from './GridHelpers.js';
 
 // --- НОВЫЕ КОНСТАНТЫ ---
 // Мы немного уменьшаем размер символов, чтобы вся сетка красиво поместилась в рамку с отступами.

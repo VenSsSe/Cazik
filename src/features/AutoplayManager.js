@@ -1,4 +1,4 @@
-import { SpeedModes } from './SpeedManager.js';
+import { SpeedModes } from '../game/SpeedManager.js';
 
 /**
  * Управляет сессией автоигры.

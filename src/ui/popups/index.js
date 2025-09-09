@@ -1,4 +1,4 @@
-import { SpeedModes } from '../../features/SpeedManager.js';
+import { SpeedModes } from '../../game/SpeedManager.js';
 
 export function showAutoplayPopup(context, startCallback) {
     if (context.autoplayPopup) {

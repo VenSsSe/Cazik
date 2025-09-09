@@ -1,5 +1,5 @@
-import { checkForWins, calculatePayout } from './game/gameLogic.js';
-import { showCongratsPopup } from './core/ui/popups.js';
+import { checkForWins, calculatePayout } from './GameLogic.js';
+import { showCongratsPopup } from '../ui/popups/index.js';
 
 // NOTE: All functions in this file are intended to be bound to a context object in app.js.
 // This gives them access to the application state (app, grid, ui, playerBalance, etc.) via `this`.
