@@ -16,7 +16,8 @@ export async function startSpin(isFirstFreeSpin = false) {
         this.freeSpinsManager.useSpin();
         this.ui.updateFreeSpins(this.freeSpinsManager.spinsLeft);
     } else {
-        const spinCost = this.bonusManager.getSpinCost(this.currentBet);
+        const totalBet = this.getBetConfiguration().totalBet;
+        const spinCost = this.bonusManager.getSpinCost(totalBet);
         if (this.playerBalance < spinCost) {
             this.autoplayManager.stop();
             this.ui.setAutoplayState(false);
@@ -54,7 +55,7 @@ export async function startSpin(isFirstFreeSpin = false) {
         
         if (wins.length === 0) break;
         
-        const payout = calculatePayout(wins, this.currentBet, this.symbols);
+        const payout = calculatePayout(wins, this.getBetConfiguration().totalBet, this.symbols);
         if (payout > 0) {
             if (this.audioManager) this.audioManager.play('win_sound');
             tumbleWin += payout;
@@ -125,13 +126,13 @@ export function handleAnteToggle() {
     if (this.isSpinning || this.autoplayManager.isActive) return;
     this.bonusManager.toggleAnteBet();
     this.ui.updateSidePanel(this.bonusManager.isAnteBetActive);
-    const newBet = this.bonusManager.getSpinCost(this.currentBet);
-    this.ui.updateBet(newBet);
+    const newBet = this.bonusManager.getSpinCost(this.getBetConfiguration().totalBet);
+    this.ui.updateBet(this.getBetConfiguration());
 }
 
 export function handleBuyBonus() {
     if (this.isSpinning || this.bonusManager.isAnteBetActive || this.autoplayManager.isActive) return;
-    const cost = this.bonusManager.getBuyBonusCost(this.currentBet);
+    const cost = this.bonusManager.getBuyBonusCost(this.getBetConfiguration().totalBet);
     if (this.playerBalance >= cost) {
         this.playerBalance -= cost;
         this.ui.updateBalance(this.playerBalance);
@@ -158,30 +159,65 @@ export function handleAutoplay() {
     }
 }
 
-export function increaseBet() { 
-    if (this.isSpinning || this.autoplayManager.isActive) return;
-    this.currentBet += this.BET_STEP;
-    if (this.currentBet > this.config.maxBet) this.currentBet = this.config.maxBet;
-    const newBet = this.bonusManager.getSpinCost(this.currentBet);
-    this.ui.updateBet(newBet);
-}
+// --- Новые функции управления ставкой ---
 
-export function decreaseBet() { 
+/**
+ * Циклично изменяет общую ставку пошагово.
+ * Сначала меняет уровень ставки, затем номинал монеты.
+ * @param {number} direction - 1 для увеличения, -1 для уменьшения.
+ */
+export function cycleTotalBet(direction) {
     if (this.isSpinning || this.autoplayManager.isActive) return;
-    if (this.currentBet > this.config.minBet) {
-        this.currentBet -= this.BET_STEP;
-        const newBet = this.bonusManager.getSpinCost(this.currentBet);
-        this.ui.updateBet(newBet);
+
+    const { betLevels, coinValues } = this.betSettings;
+    let levelIndex = this.betSettings.betLevelIndex;
+    let valueIndex = this.betSettings.coinValueIndex;
+
+    const maxLevelIndex = betLevels.length - 1;
+    const maxValueIndex = coinValues.length - 1;
+    const minLevelIndex = 0;
+    const minValueIndex = 0;
+
+    if (direction === 1) { // Увеличение ставки
+        if (levelIndex < maxLevelIndex) {
+            // Если уровень не на максимуме, просто увеличиваем его
+            levelIndex++;
+        } else if (valueIndex < maxValueIndex) {
+            // Если уровень на максимуме, но номинал - нет, увеличиваем номинал
+            valueIndex++;
+        }
+        // Если оба на максимуме, ничего не делаем
+    } else { // Уменьшение ставки
+        if (levelIndex > minLevelIndex) {
+            // Если уровень не на минимуме, просто уменьшаем его
+            levelIndex--;
+        } else if (valueIndex > minValueIndex) {
+            // Если уровень на минимуме, но номинал - нет, уменьшаем номинал
+            valueIndex--;
+        }
+        // Если оба на минимуме, ничего не делаем
     }
+
+    this.betSettings.betLevelIndex = levelIndex;
+    this.betSettings.coinValueIndex = valueIndex;
+    
+    // Обновляем UI
+    this.ui.updateBet(this.getBetConfiguration());
 }
 
-export function setBet(value) {
+
+/**
+ * Устанавливает новые индексы для уровня ставки и номинала монеты.
+ * @param {{levelIndex: number, valueIndex: number}} newConfig - Новые индексы.
+ */
+export function setBetConfiguration({ levelIndex, valueIndex }) {
     if (this.isSpinning || this.autoplayManager.isActive) return;
-    this.currentBet = value;
-    if (this.currentBet > this.config.maxBet) this.currentBet = this.config.maxBet;
-    if (this.currentBet < this.config.minBet) this.currentBet = this.config.minBet;
-    const newBet = this.bonusManager.getSpinCost(this.currentBet);
-    this.ui.updateBet(newBet);
+
+    this.betSettings.betLevelIndex = levelIndex;
+    this.betSettings.coinValueIndex = valueIndex;
+
+    // Обновляем UI
+    this.ui.updateBet(this.getBetConfiguration());
 }
 
 export function handleSettingsClick() {

@@ -15,7 +15,7 @@ export function createPanels(context) {
     context.fsText.x = context.app.screen.width / 2;
     context.fsText.y = 50;
     context.fsContainer.addChild(context.fsText);
-    context.app.stage.addChild(context.fsContainer);
+    context.container.addChild(context.fsContainer);
 
     // Tumble Win Display
     const tumbleWinStyle = new PIXI.TextStyle({

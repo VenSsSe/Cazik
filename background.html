@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+    <title>Interactive Particle Animation</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Подключаем файл со стилями -->
+    <link rel="stylesheet" href="src/background/style.css">
+</head>
+<body>
+    <div>
+        <!-- Путь к спрайту изменен на локальный файл -->
+        <canvas id="particles" data-params='{"bgColor": "0x000000","fogColor": "0x3f3f3f","fogIntensity": "0.0008","count": "1500","color": "0xc0adff","sprite": "assets/background/blic.png","size": "14", "objX": "0","objY": "1","objZ": "0"}'></canvas>
+    </div>
+
+    <!-- Загружаем Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    
+    <!-- Подключаем главный скрипт как модуль, чтобы использовать import/export -->
+    <script type="module" src="src/background/main.js"></script>
+</body>
+</html>
+

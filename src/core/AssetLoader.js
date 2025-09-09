@@ -16,7 +16,6 @@ export async function loadAssets() {
     // --- Собираем ВСЕ пути к изображениям в один массив ---
     const imagePaths = [
         // Статичные UI и фоновые изображения
-        { alias: 'background_olympus', src: 'assets/images/backgrounds/background_olympus.jpg' },
         { alias: 'reels_background', src: 'assets/images/backgrounds/reels_background.png' },
         { alias: 'game_board_frame', src: 'assets/ui/frames/game_board_frame.jpg' },
         { alias: 'symbol_grid_frame_white', src: 'assets/ui/frames/symbol_grid_frame_white.png' },

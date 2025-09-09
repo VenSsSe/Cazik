@@ -1,7 +1,8 @@
 export class InfoPanel {
-    constructor(app) {
+    constructor(context, parentContainer) {
+        this.app = context.app;
         this.container = new PIXI.Container();
-        app.stage.addChild(this.container);
+        parentContainer.addChild(this.container);
 
         const textStyle = new PIXI.TextStyle({
             fontFamily: 'Cyberpunk',
@@ -13,20 +14,16 @@ export class InfoPanel {
         });
 
         // --- Располагаем тексты на нижней панели ---
-        const panelY = app.screen.height - 55; // Общая высота для текста
+        // Позиционирование теперь управляется родительским контейнером (UI)
 
         // Текст Баланса (слева)
         this.balanceText = new PIXI.Text('', textStyle);
-        this.balanceText.anchor.set(0, 0.5); // Привязка к левому краю
-        this.balanceText.x = 50;
-        this.balanceText.y = panelY;
+        this.balanceText.anchor.set(0, 0.5);
         this.container.addChild(this.balanceText);
 
         // Текст Выигрыша (справа)
         this.winText = new PIXI.Text('', textStyle);
-        this.winText.anchor.set(1, 0.5); // Привязка к правому краю
-        this.winText.x = app.screen.width - 50;
-        this.winText.y = panelY;
+        this.winText.anchor.set(1, 0.5);
         this.container.addChild(this.winText);
     }
 
@@ -35,7 +32,7 @@ export class InfoPanel {
     }
 
     // Этот текст теперь будет управляться из BetController, так как он часть контрола
-    updateBet(value) {
+    updateBet(betConfig) {
         // Пустая функция, чтобы избежать ошибок. Управление передано.
     }
 

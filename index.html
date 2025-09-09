@@ -14,20 +14,47 @@
             padding: 0;
             width: 100%;
             height: 100%;
+            overflow: hidden;
+        }
+        /* Стили для контейнера, чтобы центрировать и игру, и фон */
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #000;
-            overflow: hidden;
+            opacity: 0; /* Initially hidden */
+            transition: opacity 1s ease-in-out; /* Smooth transition for appearance */
         }
+        /* Стили для iframe-фона */
+        #background-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 0; /* Фон будет сзади */
+        }
+        /* Стили для игрового холста */
         canvas {
+            position: relative;
+            z-index: 1; /* Игра будет спереди */
             border: 1px solid #333;
         }
     </style>
 </head>
 <body>
-    <script src="https://pixijs.download/v8.1.3/pixi.min.js"></script>
-    <script src="https://unpkg.com/@pixi/sound/dist/pixi-sound.js"></script>
-    <script type="module" src="src/main.js"></script>
+    <!-- Контейнер для всего -->
+    <div id="game-container">
+        <!-- "Живой" фон, интегрированный в проект -->
+        <iframe id="background-iframe" src="background.html"></iframe>
+        
+        <!-- Скрипты игры (холст будет создан и добавлен сюда PIXI) -->
+        <script src="https://pixijs.download/v8.1.3/pixi.min.js"></script>
+        <script src="https://unpkg.com/@pixi/sound/dist/pixi-sound.js"></script>
+        <script type="module" src="src/main.js"></script>
+    </div>
 </body>
 </html>

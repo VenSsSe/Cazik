@@ -1,0 +1,17 @@
+/* Файл: style.css
+  Назначение: Содержит все CSS-правила для приложения. 
+  Это отделяет визуальное оформление от структуры (HTML) и логики (JS).
+*/
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #000;
+    cursor: default; /* Обычный курсор для "пасхалки" */
+}
+
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}

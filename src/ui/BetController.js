@@ -1,25 +1,31 @@
-import { showBetPopup } from './popups/BetPopup.js';
+import { showBetConfigurationPopup } from './popups/BetPopup.js';
 
 export class BetController {
-    constructor(app, increaseBetCallback, decreaseBetCallback, setBetCallback) {
-        this.app = app;
-        this.increaseBetCallback = increaseBetCallback;
-        this.decreaseBetCallback = decreaseBetCallback;
-        this.setBetCallback = setBetCallback;
+    constructor(context, parentContainer) {
+        this.context = context;
+        this.app = context.app;
 
         this.container = new PIXI.Container();
-        // --- Позиционируем контейнер на нижней панели, левее кнопки СПИН ---
-        this.container.x = app.screen.width / 2 - 300;
-        this.container.y = app.screen.height - 90;
-        app.stage.addChild(this.container);
+        parentContainer.addChild(this.container);
 
-        this.textStyle = new PIXI.TextStyle({
+        // Основной стиль для крупного текста (общая ставка)
+        this.mainTextStyle = new PIXI.TextStyle({
             fontFamily: 'Cyberpunk',
-            fontSize: 38, // Тот же размер, что и в InfoPanel
+            fontSize: 20,
             fontWeight: '900',
             fill: '#f7d9a3',
             stroke: '#5c3a0a',
-            strokeThickness: 5
+            strokeThickness: 5,
+            align: 'center'
+        });
+
+        // Стиль поменьше для деталей (уровень и номинал)
+        this.detailTextStyle = new PIXI.TextStyle({
+            fontFamily: 'Cyberpunk',
+            fontSize: 18,
+            fontWeight: 'normal',
+            fill: '#f7d9a3',
+            align: 'center'
         });
 
         this.createComponents();
@@ -27,18 +33,28 @@ export class BetController {
 
     createComponents() {
         // Кнопка "+"
-        this.increaseBetButton = this.createButton('ui_button_plus', 160, 0, this.increaseBetCallback, 0.1);
+        this.increaseBetButton = this.createButton('ui_button_plus', 160, 0, () => this.context.callbacks.cycleTotalBet(1), 0.1);
         
         // Кнопка "-"
-        this.decreaseBetButton = this.createButton('ui_button_minus', -160, 0, this.decreaseBetCallback, 0.1);
+        this.decreaseBetButton = this.createButton('ui_button_minus', -160, 0, () => this.context.callbacks.cycleTotalBet(-1), 0.1);
         
-        // Текст ставки, который теперь является кликабельной кнопкой
-        this.betText = new PIXI.Text('', this.textStyle);
-        this.betText.anchor.set(0.5);
-        this.betText.eventMode = 'static';
-        this.betText.cursor = 'pointer';
-        this.betText.on('pointerdown', () => showBetPopup(this.app, this.textStyle, this.setBetCallback));
-        this.container.addChild(this.betText);
+        // --- Новый контейнер для текста ставки ---
+        this.betTextContainer = new PIXI.Container();
+        this.betTextContainer.eventMode = 'static';
+        this.betTextContainer.cursor = 'pointer';
+        this.betTextContainer.on('pointerdown', () => {
+            showBetConfigurationPopup(this.context, this.context.callbacks.setBetConfiguration);
+        });
+        this.container.addChild(this.betTextContainer);
+
+        this.totalBetText = new PIXI.Text('', this.mainTextStyle);
+        this.totalBetText.anchor.set(0.5, 1);
+
+        this.detailBetText = new PIXI.Text('', this.detailTextStyle);
+        this.detailBetText.anchor.set(0.5, 0);
+        this.detailBetText.y = 5;
+
+        this.betTextContainer.addChild(this.totalBetText, this.detailBetText);
     }
 
     createButton(texture, x, y, callback, scale) {
@@ -54,9 +70,8 @@ export class BetController {
         return button;
     }
 
-    updateBetText(value) {
-        this.betText.text = `СТАВКА\n${value.toFixed(2)}`;
-        // Делаем текст многострочным для лучшего вида
-        this.betText.style.align = 'center';
+    updateBetText(betConfig) {
+        this.totalBetText.text = `СТАВКА\n${betConfig.totalBet.toFixed(2)}`;
+        this.detailBetText.text = `УР ${betConfig.level} | НОМ ${betConfig.value.toFixed(2)}`;
     }
 }
